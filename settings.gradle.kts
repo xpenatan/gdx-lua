@@ -4,6 +4,12 @@ include(":lua:builder")
 include(":lua:core")
 include(":lua:desktop")
 
+// Examples
+include(":examples:basic:core")
+include(":examples:basic:desktop")
+include(":examples:basic:teavm")
+
+// #### Use include build to use other project source directly. Just update the source path ####
 
 //includeBuild("E:\\Dev\\Projects\\java\\gdx-teavm") {
 //    dependencySubstitution {

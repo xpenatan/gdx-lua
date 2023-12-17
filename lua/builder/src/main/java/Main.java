@@ -3,16 +3,22 @@ import com.github.xpenatan.jparser.builder.BuildMultiTarget;
 import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
+import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.FileHelper;
+import com.github.xpenatan.jparser.cpp.CppCodeParser;
+import com.github.xpenatan.jparser.cpp.CppGenerator;
+import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        buildLua();
-//        buildSol();
+//        buildLua();
+        buildGdxLua();
     }
 
     private static void buildLua() throws Exception {
@@ -83,8 +89,14 @@ public class Main {
         return multiTarget;
     }
 
-    private static void buildSol() throws Exception {
-        String libName = "sol";
+    private static void buildGdxLua() throws Exception {
+        String libName = "gdx-lua";
+        String basePackage = "lua";
+
+        String idlPath = new File("src/main/cpp/lua.idl").getCanonicalPath();
+        IDLReader idlReader = IDLReader.readIDL(idlPath);
+        String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
+        String genDir = "../core/src/main/java";
 
         String cppSourceDir = new File("./build/sol2/").getCanonicalPath();
         String libsDir = new File("./build/c++/libs/").getCanonicalPath();
@@ -93,6 +105,14 @@ public class Main {
         String libDestinationPath = cppDestinationPath + "/sol2";
 
         FileHelper.copyDir(cppSourceDir, libDestinationPath);
+
+        CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath, false);
+        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir);
+        cppParser.generateClass = true;
+        JParser.generate(cppParser, baseJavaDir, genDir);
+
+        Path copyOut = new File(libDestinationPath).toPath();
+        FileHelper.copyDir(new File("src/main/cpp/cpp-source/custom").toPath(), copyOut);
 
         BuildConfig buildConfig = new BuildConfig(
                 cppDestinationPath,
@@ -104,13 +124,13 @@ public class Main {
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
 
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
-            targets.add(getSolWindowBuildTarget());
+            targets.add(getWindowBuildTarget());
         }
 
         JBuilder.build(buildConfig, targets);
     }
 
-    private static BuildMultiTarget getSolWindowBuildTarget() throws IOException {
+    private static BuildMultiTarget getWindowBuildTarget() throws IOException {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
         String buildPath = new File("build/c++/").getCanonicalPath().replace("\\", "/");
@@ -119,16 +139,24 @@ public class Main {
         WindowsTarget windowsTarget = new WindowsTarget();
         windowsTarget.isStatic = true;
         windowsTarget.addJNI = false;
-        windowsTarget.headerDirs.add("-Isrc/sol2/include");
+        windowsTarget.headerDirs.add("-Isrc/sol2");
         windowsTarget.headerDirs.add("-Isrc/lua/");
-        windowsTarget.filterCPPSuffix = ".hpp";
-        windowsTarget.cppInclude.add("**/sol2/include/**.hpp");
-
-
-        windowsTarget.linkerFlags.add("-L" + libPath);
-//        windowsTarget.linkerFlags.add("-l:lua64.a");
-        windowsTarget.linkerFlags.add("-l:liblua-5.4.4.dll");
+        windowsTarget.cppInclude.add("**/sol2/*.cpp");
         multiTarget.add(windowsTarget);
+
+        WindowsTarget glueTarget = new WindowsTarget();
+        glueTarget.headerDirs.add("-Isrc/sol2/");
+        glueTarget.headerDirs.add("-Isrc/lua/");
+        glueTarget.linkerFlags.add("-L" + libPath);
+        glueTarget.linkerFlags.add("-l:lua64.a");
+        glueTarget.linkerFlags.add("-l:gdx-lua64.a");
+        multiTarget.add(glueTarget);
+
+//        windowsTarget.linkerFlags.add("-L" + libPath);
+//        windowsTarget.linkerFlags.add("-l:lua64.a");
+//        windowsTarget.linkerFlags.add("-l:liblua-5.4.4.dll");
+//        windowsTarget.linkerFlags.add(libPath + "/lua64.a");
+//        multiTarget.add(windowsTarget);
         return multiTarget;
     }
 }

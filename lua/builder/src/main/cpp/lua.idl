@@ -1,0 +1,4 @@
+
+interface Lua {
+    static void script();
+};
