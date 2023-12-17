@@ -1,6 +1,6 @@
 val moduleName = "desktop"
 
-val windowsFile = "$projectDir/../generator/build/c++/libs/windows/gdx-lua64.dll"
+val windowsFile = "$projectDir/../builder/build/c++/libs/windows/gdx-lua64.dll"
 
 tasks.jar {
     from(windowsFile)
