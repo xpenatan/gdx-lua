@@ -1,4 +1,4 @@
-package com.github.xpenatan.lua.example.basic;
+package lua.example.basic;
 
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;

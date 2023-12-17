@@ -1,4 +1,4 @@
-package com.github.xpenatan.lua.example.basic;
+package lua.example.basic;
 
 import com.badlogic.gdx.ScreenAdapter;
 import lua.LuaLoader;

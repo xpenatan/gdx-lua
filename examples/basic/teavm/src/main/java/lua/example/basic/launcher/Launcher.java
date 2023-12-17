@@ -2,7 +2,7 @@ package lua.example.basic.launcher;
 
 import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplicationConfiguration;
-import com.github.xpenatan.lua.example.basic.LuaGame;
+import lua.example.basic.LuaGame;
 
 public class Launcher {
 
