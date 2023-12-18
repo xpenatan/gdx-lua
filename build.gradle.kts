@@ -49,7 +49,8 @@ configure(allprojects) {
 
 var libProjects = mutableSetOf(
     project(":lua:core"),
-    project(":lua:desktop")
+    project(":lua:desktop"),
+    project(":lua:teavm")
 )
 
 configure(libProjects) {

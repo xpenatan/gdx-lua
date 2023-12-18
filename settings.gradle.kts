@@ -3,6 +3,7 @@ include(":lua:base")
 include(":lua:builder")
 include(":lua:core")
 include(":lua:desktop")
+include(":lua:teavm")
 
 // Examples
 include(":examples:basic:core")
