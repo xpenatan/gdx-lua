@@ -2,7 +2,7 @@ import de.undercouch.gradle.tasks.download.Download
 import org.gradle.kotlin.dsl.support.unzipTo
 
 plugins {
-    id("de.undercouch.download") version("5.4.0")
+    id("de.undercouch.download") version("5.5.0")
 }
 
 val mainClassName = "Main"
@@ -44,23 +44,24 @@ tasks.register<Download>("download_source_lua") {
     }
 }
 
-val solZippedPath = "$buildDir/sol2-source.zip"
-val solSourcePath = "$buildDir/sol2-source"
-val solSourceDestination = "$buildDir/sol2/"
+val solZippedPath = "$buildDir/sol2/sol/"
 
-tasks.register<Download>("download_source_sol") {
+tasks.register("download_source_sol") {
     group = "lua"
     description = "Download sol2 source"
-    src("https://github.com/ThePhD/sol2/archive/refs/tags/v3.3.1.zip")
-    dest(File(solZippedPath))
     doLast {
-        unzipTo(File(solSourcePath), dest)
-        copy{
-            from("$solSourcePath/sol2-3.3.1")
-            into(solSourceDestination)
+        download.run {
+            src("https://github.com/ThePhD/sol2/releases/download/v3.3.0/sol.hpp")
+            dest("$solZippedPath/sol.hpp")
         }
-        delete(solSourcePath)
-        delete(solZippedPath)
+        download.run {
+            src("https://github.com/ThePhD/sol2/releases/download/v3.3.0/config.hpp")
+            dest("$solZippedPath/config.hpp")
+        }
+        download.run {
+            src("https://github.com/ThePhD/sol2/releases/download/v3.3.0/forward.hpp")
+            dest("$solZippedPath/forward.hpp")
+        }
     }
 }
 

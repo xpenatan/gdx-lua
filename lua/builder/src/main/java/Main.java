@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-//        buildLua();
+        buildLua();
         buildGdxLua();
     }
 
@@ -66,7 +66,7 @@ public class Main {
         windowsTarget.cppExclude.add("**/lua/ltests.c");
         windowsTarget.cppExclude.add("**/lua/onelua.c");
         windowsTarget.cppFlags.add("-std=gnu99");
-        windowsTarget.cppFlags.add("-DLUA_BUILD_AS_DLL");
+//        windowsTarget.cppFlags.add("-DLUA_BUILD_AS_DLL");
         windowsTarget.cppFlags.add("-DLUA_COMPAT_5_3");
         windowsTarget.cppFlags.remove("-std=c++17");
         multiTarget.add(windowsTarget);
@@ -134,29 +134,15 @@ public class Main {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
         String buildPath = new File("build/c++/").getCanonicalPath().replace("\\", "/");
-        String libPath = buildPath + "/libs/windows";
-
         WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.isStatic = true;
-        windowsTarget.addJNI = false;
+        windowsTarget.addJNI = true;
         windowsTarget.headerDirs.add("-Isrc/sol2");
-        windowsTarget.headerDirs.add("-Isrc/lua/");
-        windowsTarget.cppInclude.add("**/sol2/*.cpp");
+        windowsTarget.headerDirs.add("-Isrc/lua");
+        windowsTarget.linkerFlags.add(buildPath + "/libs/windows/lua64.a");
+        windowsTarget.cppFlags.add("-DSOL_API_LINKAGE");
+        windowsTarget.cppFlags.add("-DSOL_C_FUNCTION_LINKAGE");
+        windowsTarget.cppFlags.add("-DSOL_USE_LUA_HPP");
         multiTarget.add(windowsTarget);
-
-        WindowsTarget glueTarget = new WindowsTarget();
-        glueTarget.headerDirs.add("-Isrc/sol2/");
-        glueTarget.headerDirs.add("-Isrc/lua/");
-        glueTarget.linkerFlags.add("-L" + libPath);
-        glueTarget.linkerFlags.add("-l:lua64.a");
-        glueTarget.linkerFlags.add("-l:gdx-lua64.a");
-        multiTarget.add(glueTarget);
-
-//        windowsTarget.linkerFlags.add("-L" + libPath);
-//        windowsTarget.linkerFlags.add("-l:lua64.a");
-//        windowsTarget.linkerFlags.add("-l:liblua-5.4.4.dll");
-//        windowsTarget.linkerFlags.add(libPath + "/lua64.a");
-//        multiTarget.add(windowsTarget);
         return multiTarget;
     }
 }

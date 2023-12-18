@@ -1,6 +1,9 @@
 #pragma once
 
 #include <sol/sol.hpp>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
