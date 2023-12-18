@@ -42,10 +42,6 @@ public class BuildLua {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
         WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.cppCompiler.clear();
-        windowsTarget.linkerCompiler.clear();
-        windowsTarget.cppCompiler.add("x86_64-w64-mingw32-gcc");
-        windowsTarget.linkerCompiler.add("x86_64-w64-mingw32-gcc");
         windowsTarget.isStatic = true;
         windowsTarget.addJNI = false;
         windowsTarget.headerDirs.add("-Isrc/lua/");
@@ -54,25 +50,15 @@ public class BuildLua {
         windowsTarget.cppExclude.add("**/lua/lua.c");
         windowsTarget.cppExclude.add("**/lua/ltests.c");
         windowsTarget.cppExclude.add("**/lua/onelua.c");
-        windowsTarget.cppFlags.add("-std=gnu99");
-//        windowsTarget.cppFlags.add("-DLUA_BUILD_AS_DLL");
         windowsTarget.cppFlags.add("-DLUA_COMPAT_5_3");
-        windowsTarget.cppFlags.remove("-std=c++17");
         multiTarget.add(windowsTarget);
 
         WindowsTarget linkTarget = new WindowsTarget();
-        linkTarget.cppCompiler.clear();
-        linkTarget.linkerCompiler.clear();
-        linkTarget.cppCompiler.add("x86_64-w64-mingw32-gcc");
-        linkTarget.linkerCompiler.add("x86_64-w64-mingw32-gcc");
         linkTarget.headerDirs.add("-Isrc/lua/");
         linkTarget.filterCPPSuffix = ".c";
-        linkTarget.shouldLink = true;
-        linkTarget.shouldCompile = true;
         linkTarget.cppInclude.add("**/lua/lua.c");
         linkTarget.addJNI = false;
         linkTarget.linkerFlags.add(buildPath + "/libs/windows/lua64.a");
-        linkTarget.cppFlags.remove("-std=c++17");
         multiTarget.add(linkTarget);
 
         return multiTarget;

@@ -71,9 +71,7 @@ public class Main {
         windowsTarget.headerDirs.add("-Isrc/sol2");
         windowsTarget.headerDirs.add("-Isrc/lua");
         windowsTarget.linkerFlags.add(buildPath + "/libs/windows/lua64.a");
-        windowsTarget.cppFlags.add("-DSOL_API_LINKAGE");
-        windowsTarget.cppFlags.add("-DSOL_C_FUNCTION_LINKAGE");
-        windowsTarget.cppFlags.add("-DSOL_USE_LUA_HPP");
+        windowsTarget.cppFlags.add("-DSOL_USING_CXX_LUA ");
         multiTarget.add(windowsTarget);
         return multiTarget;
     }
