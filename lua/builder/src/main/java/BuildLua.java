@@ -2,8 +2,10 @@ import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildMultiTarget;
 import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.builder.JBuilder;
+import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.util.FileHelper;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class BuildLua {
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
             targets.add(getStaticLuaWindowBuildTarget());
         }
+        targets.add(getEmscriptenStaticBuildTarget());
 
         JBuilder.build(buildConfig, targets);
     }
@@ -60,6 +63,33 @@ public class BuildLua {
         linkTarget.addJNI = false;
         linkTarget.linkerFlags.add(buildPath + "/libs/windows/lua64.a");
         multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getEmscriptenStaticBuildTarget() {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        // Make a static library
+        EmscriptenTarget libTarget = new EmscriptenTarget(null);
+        libTarget.isStatic = true;
+        libTarget.addJNI = false;
+        libTarget.compileGlueCode = false;
+        libTarget.headerDirs.add("-Isrc/lua");
+        libTarget.filterCPPSuffix = ".c";
+        libTarget.cppInclude.add("**/lua/*.c");
+        libTarget.cppExclude.add("**/lua/lua.c");
+        libTarget.cppExclude.add("**/lua/ltests.c");
+        libTarget.cppExclude.add("**/lua/onelua.c");
+        libTarget.cppFlags.add("-DLUA_COMPAT_5_3");
+        multiTarget.add(libTarget);
+
+
+//        // Compile glue code and link to make js file
+//        EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
+//        linkTarget.headerDirs.add("-includesrc/imgui/ImGuiCustom.h");
+//        linkTarget.linkerFlags.add("../../libs/emscripten/imgui.a");
+//        multiTarget.add(linkTarget);
 
         return multiTarget;
     }

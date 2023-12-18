@@ -33,7 +33,7 @@ public class LuaLoader {
     */
     public static void init(Runnable run) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        libraryLoader.load("gdx-lua");
+        libraryLoader.load("gdx_lua");
         run.run();
     }
 
