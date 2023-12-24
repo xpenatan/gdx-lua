@@ -9,8 +9,7 @@
 #include <stdint.h>     // intptr_t
 #endif
 
-const char GLOBA_TABLE_FUNCTIONS[] = "__cppfunction__";
-
+const char GLOBAL_TABLE_FUNCTIONS[] = "__cppfunction__";
 
 class LuaState;
 
@@ -194,8 +193,8 @@ public:
         intptr_t ptr = reinterpret_cast<intptr_t>(callback);
         intptr_t* data = (intptr_t*)lua_newuserdata(L, sizeof(intptr_t));
         *data = ptr;
-        luaL_setmetatable(L, GLOBA_TABLE_FUNCTIONS);
-        lua_getfield(L, LUA_REGISTRYINDEX, GLOBA_TABLE_FUNCTIONS);
+        luaL_setmetatable(L, GLOBAL_TABLE_FUNCTIONS);
+        lua_getfield(L, LUA_REGISTRYINDEX, GLOBAL_TABLE_FUNCTIONS);
         lua_setmetatable(L, -2);
         lua_pushcclosure(L, &lua_function, 1);
         lua_setglobal((lua_State*)L, (const char*)key);
