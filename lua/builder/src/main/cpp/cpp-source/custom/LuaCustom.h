@@ -67,7 +67,7 @@ public:
     int x_lua_geti(int index, long long i)                  { return lua_geti(L, index, i); }
     int x_lua_getmetatable(int index)                       { return lua_getmetatable(L, index); }
     int x_lua_gettable(int index)                           { return lua_gettable(L, index); }
-    int x_lua_gettop(int index)                             { return lua_gettop(L); }
+    int x_lua_gettop()                                      { return lua_gettop(L); }
     int x_lua_getiuservalue(int index, int n)               { return lua_getiuservalue(L, index, n); }
     void x_lua_insert(int index)                            { lua_insert(L, index); }
     int x_lua_isboolean(int index)                          { return lua_isboolean(L, index); }

@@ -20,13 +20,23 @@ public class BasicExample extends ScreenAdapter {
         lua.registerFunction("beep", new LuaFunction() {
             @Override
             public int onCall(LuaState luaState) {
-                System.out.println("Beep is called");
+                int params = luaState.x_lua_gettop();
+                int value = luaState.x_lua_tointeger(1);
+
+                int paramType1 = luaState.x_lua_type(1);
+                int paramType2 = luaState.x_lua_type(2);
+                int paramType3 = luaState.x_lua_type(3);
+
+                System.out.println("Beep is called: param: " + params);
+                System.out.println("paramType1: " + paramType1);
+                System.out.println("paramType2: " + paramType2);
+                System.out.println("paramType3: " + paramType3);
 
                 return 0;
             }
         });
 
-        lua.script("beep()");
+        lua.script("beep(10, 2.0)");
 
         lua.destroyContext();
     }
