@@ -18,7 +18,7 @@ dependencies {
 
 val mainClassName = "lua.example.basic.Build"
 
-tasks.register<JavaExec>("basic-build") {
+tasks.register<JavaExec>("basic-build-teavm") {
     group = "example-teavm"
     description = "Build basic example"
     mainClass.set(mainClassName)
@@ -28,8 +28,8 @@ tasks.register<JavaExec>("basic-build") {
 tasks.register("basic-run-teavm") {
     group = "example-teavm"
     description = "Run teavm app"
-    val list = listOf("basic-build", "jettyRun")
+    val list = listOf("basic-build-teavm", "jettyRun")
     dependsOn(list)
 
-    tasks.findByName("jettyRun")?.mustRunAfter("basic-build")
+    tasks.findByName("jettyRun")?.mustRunAfter("basic-build-teavm")
 }
