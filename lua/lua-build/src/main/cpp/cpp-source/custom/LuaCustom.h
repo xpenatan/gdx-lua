@@ -44,17 +44,7 @@ public:
         L = NULL;
     }
 
-    void createContext() {
-        L = luaL_newstate();
-        luaL_openlibs(L);
-    }
-
-    void destroyContext() {
-        if (L != NULL) {
-            lua_close(L);
-            L = NULL;
-        }
-    }
+    // #### BEGIN LOW LEVEL LUA METHODS
 
     void x_lua_absindex(int idx)                               { lua_absindex(L, idx); }
     void x_lua_arith(int op)                                   { lua_arith(L, op); }
@@ -71,6 +61,7 @@ public:
     int x_lua_getmetatable(int index)                          { return lua_getmetatable(L, index); }
     int x_lua_gettable(int index)                              { return lua_gettable(L, index); }
     int x_lua_gettop()                                         { return lua_gettop(L); }
+    int x_lua_getuservalue(int index)                          { return lua_getuservalue(L, index); }
     int x_lua_getiuservalue(int index, int n)                  { return lua_getiuservalue(L, index, n); }
     void x_lua_insert(int index)                               { lua_insert(L, index); }
     int x_lua_isboolean(int index)                             { return lua_isboolean(L, index); }
@@ -90,6 +81,8 @@ public:
 
     void x_lua_newtable()                                      { lua_newtable(L); }
 
+    void* x_lua_newuserdata(size_t size)                       { return lua_newuserdata(L, size); }
+    void* x_lua_newuserdatauv(size_t size, int nuvalue)        { return lua_newuserdatauv(L, size, nuvalue); }
     int x_lua_next(int index)                                  { return lua_next(L, index); }
 
     void x_lua_pop(int n)                                      { lua_pop(L, n); }
@@ -121,6 +114,8 @@ public:
     void x_lua_setfield(int index, const char* k)              { lua_setfield(L, index, k); }
     void x_lua_setglobal(int index, const char* name)          { lua_setglobal(L, name); }
     void x_lua_seti(int index, lua_Integer n)                  { lua_seti(L, index, n); }
+
+    int x_lua_setuservalue(int index)                            { return lua_setuservalue(L, index); }
     int x_lua_setiuservalue(int index, int n)                  { return lua_setiuservalue(L, index, n); }
     int x_lua_setmetatable(int index)                          { return lua_setmetatable(L, index); }
     void x_lua_settable(int index)                             { lua_settable(L, index); }
@@ -146,6 +141,20 @@ public:
     void x_lua_warning(const char* msg, int tocont)            { lua_warning(L, msg, tocont); }
 
     int x_lua_yield(int nresults)                              { return lua_yield(L, nresults); }
+
+    // #### END LOW LEVEL LUA METHODS
+
+    void createContext() {
+        L = luaL_newstate();
+        luaL_openlibs(L);
+    }
+
+    void destroyContext() {
+        if (L != NULL) {
+            lua_close(L);
+            L = NULL;
+        }
+    }
 
     void collectGarbage() {
         sol::state_view lua(L);
@@ -215,5 +224,15 @@ public:
             lua_pop(L, 1);               // remove value(-1), now key on top at(-1)
         }
         lua_pop(L, 1);                 // remove global table(-1)
+    }
+
+    static void setIntToVoid(void * pointer, int value) {
+      int * data = (int *) pointer;
+      *data = value;
+    }
+
+    static int getIntFromVoid(void * pointer) {
+      int * data = (int *) pointer;
+      return *data;
     }
 };

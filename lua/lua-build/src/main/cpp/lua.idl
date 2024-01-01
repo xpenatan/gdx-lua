@@ -1,8 +1,6 @@
 
 interface LuaState {
     void LuaState();
-    void createContext();
-    void destroyContext();
 
     // #### BEGIN LOW LEVEL LUA METHODS
 
@@ -40,6 +38,8 @@ interface LuaState {
 
     void x_lua_newtable();
 
+    any x_lua_newuserdata(unsigned long size);
+    any x_lua_newuserdatauv(unsigned long size, long nuvalue);
     long x_lua_next(long index);
 
     void x_lua_pop(long n);
@@ -71,6 +71,7 @@ interface LuaState {
     void x_lua_setfield(long index, [Const] DOMString k);
     void x_lua_setglobal(long index, [Const] DOMString name);
     void x_lua_seti(long index, long long n);
+    long x_lua_setuservalue(long index);
     long x_lua_setiuservalue(long index, long n);
     long x_lua_setmetatable(long index);
     void x_lua_settable(long index);
@@ -99,6 +100,9 @@ interface LuaState {
 
     // #### END LOW LEVEL LUA METHODS
 
+    void createContext();
+    void destroyContext();
+
     void collectGarbage();
 
     void script(DOMString code);
@@ -113,6 +117,9 @@ interface LuaState {
     void setString(DOMString key, DOMString value);
 
     void registerFunction(DOMString key, LuaFunction callback);
+
+    static void setIntToVoid(any pointer, long value);
+    static long getIntFromVoid(any pointer);
 };
 
 interface LuaFunction {
