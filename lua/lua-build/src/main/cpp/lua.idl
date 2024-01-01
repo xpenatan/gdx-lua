@@ -83,13 +83,13 @@ interface LuaState {
     void x_lua_toclose(long index);
     long long x_lua_tointeger(long index);
 
-//    const char* x_lua_tointeger(long index, size_t* len);
+//    [Const, Value] IDLString x_lua_tolstring(long index, size_t* len);
     double x_lua_tonumber(long index);
 
-//    const char* x_lua_tostring(long index);
+    [Const, Value] IDLString x_lua_tostring(long index);
 
     long x_lua_type(long index);
-//    const char* x_lua_typename(long tp);
+    [Const, Value] IDLString x_lua_typename(long tp);
 
     long x_lua_upvalueindex(long i);
     double x_lua_version();
@@ -105,7 +105,7 @@ interface LuaState {
     long getOrInt(DOMString key, long otherwise);
     float getOrFloat(DOMString key, float otherwise);
     boolean getOrBool(DOMString key, boolean otherwise);
-//    DOMString getOrString(DOMString key, DOMString otherwise);
+    [Const, Value] IDLString getOrString(DOMString key, DOMString otherwise);
 
     void setInt(DOMString key, long value);
     void setFloat(DOMString key, float value);

@@ -43,13 +43,15 @@ public class BasicExample extends ImGuiRenderer {
             @Override
             public int onCall(LuaState luaState) {
                 int params = luaState.x_lua_gettop();
-                int value = luaState.x_lua_tointeger(1);
+                lua.idl.helper.IDLString idlString = luaState.x_lua_tostring(1);
+//                int value = luaState.x_lua_tointeger(1);
 
                 int paramType1 = luaState.x_lua_type(1);
                 int paramType2 = luaState.x_lua_type(2);
                 int paramType3 = luaState.x_lua_type(3);
 
                 System.out.println("Beep is called: param: " + params);
+                System.out.println("Beep is called: value: " + idlString.c_str());
                 System.out.println("paramType1: " + paramType1);
                 System.out.println("paramType2: " + paramType2);
                 System.out.println("paramType3: " + paramType3);
@@ -58,7 +60,7 @@ public class BasicExample extends ImGuiRenderer {
             }
         });
 
-        lua.script("beep(10)");
+        lua.script("beep(\"HELLO\")");
 
         lua.destroyContext();
     }
