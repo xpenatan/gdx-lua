@@ -1,19 +1,41 @@
 package lua.example.basic;
 
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import imgui.ImGui;
+import imgui.extension.textedit.Coordinates;
+import imgui.extension.textedit.LanguageDefinition;
+import imgui.extension.textedit.TextEditor;
+import imgui.idl.helper.IDLString;
 import lua.LuaFunction;
 import lua.LuaState;
+import lua.example.basic.imgui.ImGuiRenderer;
 
-public class BasicExample extends ScreenAdapter {
+public class BasicExample extends ImGuiRenderer {
 
+    private TextEditor editor;
     private OrthographicCamera uiCam;
     private SpriteBatch batch;
     public LuaState lua;
 
     @Override
     public void show() {
+        super.show();
+        editor = new TextEditor();
+
+        LanguageDefinition languageDefinition = LanguageDefinition.Lua();
+        editor.SetLanguageDefinition(languageDefinition);
+        IDLString text = new IDLString();
+        String code = "\n" +
+                "function onCreate()\n" +
+                "\n" +
+                "end\n" +
+                "\n\n" +
+                "function onRender(delta)\n" +
+                "\n" +
+                "end\n";
+        text.append(code);
+        editor.SetText(text);
         lua = new LuaState();
         lua.createContext();
 
@@ -36,12 +58,21 @@ public class BasicExample extends ScreenAdapter {
             }
         });
 
-        lua.script("beep(10, 2.0)");
+        lua.script("beep(10)");
 
         lua.destroyContext();
     }
 
     @Override
-    public void render(float delta) {
+    public void renderImGui() {
+        Coordinates coordinates = editor.GetCursorPosition();
+
+        ImGui.Begin("Editor");
+
+        String text = "\t" + (coordinates.get_mLine() + 1) + "/" + (coordinates.get_mColumn() + 1) + " " + editor.GetTotalLines() + " lines | " + (editor.IsOverwrite() ? "Ovr" : "Ins") + " | " + (editor.CanUndo() ? "*" : " ") + " | " + editor.GetLanguageDefinition().get_mName().c_str();
+        ImGui.Text(text);
+
+        editor.Render("Title");
+        ImGui.End();
     }
 }

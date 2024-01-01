@@ -1,6 +1,7 @@
 package lua.example.basic;
 
 import com.badlogic.gdx.ScreenAdapter;
+import imgui.ImGuiLoader;
 import lua.LuaLoader;
 
 public class LuaInitScreen extends ScreenAdapter {
@@ -15,7 +16,7 @@ public class LuaInitScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        LuaLoader.init(() -> init = true);
+        LuaLoader.init(() -> ImGuiLoader.init(() -> init = true));
     }
 
     @Override
