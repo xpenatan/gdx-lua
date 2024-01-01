@@ -9,6 +9,7 @@ import imgui.extension.textedit.TextEditor;
 import imgui.idl.helper.IDLString;
 import lua.LuaFunction;
 import lua.LuaState;
+import lua.ScriptState;
 import lua.example.basic.imgui.ImGuiRenderer;
 
 public class BasicExample extends ImGuiRenderer {
@@ -60,7 +61,12 @@ public class BasicExample extends ImGuiRenderer {
             }
         });
 
-        lua.script("beep(\"HELLO\")");
+        ScriptState state = lua.script("beepp(\"HELLO\")");
+
+        if(!state.get_isValid()) {
+            String error = state.get_rawErrorText().c_str();
+            System.out.println("test: " + error);
+        }
 
         lua.destroyContext();
     }

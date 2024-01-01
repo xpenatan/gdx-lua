@@ -51,6 +51,7 @@ public class BuildLua {
         windowsTarget.cppExclude.add("**/lua/ltests.c");
         windowsTarget.cppExclude.add("**/lua/onelua.c");
         windowsTarget.cppFlags.add("-DLUA_COMPAT_5_3");
+        windowsTarget.cppFlags.add("-DLUA_USE_LONGJMP");
         multiTarget.add(windowsTarget);
 
         return multiTarget;
@@ -70,6 +71,7 @@ public class BuildLua {
         libTarget.cppExclude.add("**/lua/ltests.c");
         libTarget.cppExclude.add("**/lua/onelua.c");
         libTarget.cppFlags.add("-DLUA_COMPAT_5_3");
+        libTarget.cppFlags.add("-DLUA_USE_LONGJMP");
         multiTarget.add(libTarget);
 
         return multiTarget;

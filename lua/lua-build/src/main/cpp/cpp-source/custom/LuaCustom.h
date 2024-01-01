@@ -1,5 +1,6 @@
 #pragma once
 
+#define SOL_DEFAULT_PASS_ON_ERROR 1
 #include <sol/sol.hpp>
 #include <iostream>
 #include <string>
@@ -10,11 +11,15 @@
 #include <stdint.h>     // intptr_t
 #endif
 
-
-
 const char GLOBAL_TABLE_FUNCTIONS[] = "__cppfunction__";
 
 class LuaState;
+
+struct ScriptState {
+    std::string errorText;
+    std::string rawErrorText;
+    bool isValid;
+};
 
 class LuaFunction
 {
@@ -161,9 +166,27 @@ public:
         lua.collect_garbage();
     }
 
-    void script(const char* code) {
+    const ScriptState script(const char* code) {
         sol::state_view lua(L);
-        lua.script(code);
+        sol::protected_function_result result = lua.safe_script(code);
+        ScriptState scriptState;
+        sol::call_status status = result.status();
+        scriptState.isValid = status == sol::call_status::ok;
+        if (!scriptState.isValid) {
+            sol::type t = sol::type_of(L, result.stack_index());
+
+            scriptState.errorText = "Lua: ";
+            scriptState.errorText += to_string(status);
+            scriptState.errorText += " error";
+
+            if (t == sol::type::string) {
+                scriptState.errorText += ": ";
+                sol::string_view serr = sol::stack::unqualified_get<sol::string_view>(L, result.stack_index());
+                scriptState.rawErrorText.append(serr.data(), serr.size());
+                scriptState.errorText = scriptState.rawErrorText;
+            }
+        }
+        return scriptState;
     }
 
     int getOrInt(const char* key, int otherwise) {

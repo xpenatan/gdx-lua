@@ -105,7 +105,7 @@ interface LuaState {
 
     void collectGarbage();
 
-    void script(DOMString code);
+    [Const, Value] ScriptState script(DOMString code);
     long getOrInt(DOMString key, long otherwise);
     float getOrFloat(DOMString key, float otherwise);
     boolean getOrBool(DOMString key, boolean otherwise);
@@ -130,4 +130,10 @@ interface LuaFunction {
 interface LuaFunctionImpl {
     void LuaFunctionImpl();
     long onCall(LuaState luaState);
+};
+
+interface ScriptState {
+    [Value] attribute IDLString errorText;
+    [Value] attribute IDLString rawErrorText;
+    attribute boolean isValid;
 };
