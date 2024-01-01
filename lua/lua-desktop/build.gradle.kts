@@ -1,6 +1,6 @@
-val moduleName = "desktop"
+val moduleName = "lua-desktop"
 
-val windowsFile = "$projectDir/../builder/build/c++/libs/windows/gdx_lua64.dll"
+val windowsFile = "$projectDir/../lua-build/build/c++/libs/windows/gdx_lua64.dll"
 
 tasks.jar {
     from(windowsFile)

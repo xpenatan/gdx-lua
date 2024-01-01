@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        BuildLua.buildLua();
+//        BuildLua.buildLua();
         buildGdxLua();
     }
 
@@ -27,56 +27,56 @@ public class Main {
         String libName = "gdx_lua";
         String basePackage = "lua";
 
-        String idlPath = new File("src/main/cpp/lua.idl").getCanonicalPath();
-        IDLReader idlReader = IDLReader.readIDL(idlPath);
-        String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
-        String genDir = "../core/src/main/java";
+        String luaPath = new File("./../").getCanonicalPath().replace("\\", "/");
+        String luaBasePath = luaPath + "/lua-base";
+        String luaBuildPath = luaPath + "/lua-build";
+        String luaCorePath = luaPath + "/lua-core";
+        String luaTeavmPath = luaPath + "/lua-teavm";
 
-        String cppSourceDir = new File("./build/sol2/").getCanonicalPath();
-        String libsDir = new File("./build/c++/libs/").getCanonicalPath();
-        String libBuildPath = new File("./build/c++/").getCanonicalPath();
-        String cppDestinationPath = libBuildPath + "/src";
+        String idlPath = luaBuildPath + "/src/main/cpp/lua.idl";
+        IDLReader idlReader = IDLReader.readIDL(idlPath);
+        String baseJavaDir = luaBasePath + "/src/main/java";
+
+        String cppSourceDir = luaBuildPath + "/build/sol2/";
+        String cppBuildPath = luaBuildPath + "/build/c++";
+        String libsDir = cppBuildPath + "/libs/";
+        String cppDestinationPath = cppBuildPath + "/src";
         String libDestinationPath = cppDestinationPath + "/sol2";
 
         FileHelper.copyDir(cppSourceDir, libDestinationPath);
-
-        CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath, false);
-        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir);
-        cppParser.generateClass = true;
-        JParser.generate(cppParser, baseJavaDir, genDir);
-
         Path copyOut = new File(libDestinationPath).toPath();
         FileHelper.copyDir(new File("src/main/cpp/cpp-source/custom").toPath(), copyOut);
 
-        String teaVMgenDir = "../teavm/src/main/java/";
-        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir);
-        JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
-
-        BuildConfig buildConfig = new BuildConfig(
-                cppDestinationPath,
-                libBuildPath,
-                libsDir,
-                libName
-        );
+        {
+            CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath, false);
+            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir);
+            cppParser.generateClass = true;
+            JParser.generate(cppParser, baseJavaDir, luaCorePath + "/src/main/java");
+        }
+        {
+            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir);
+            JParser.generate(teavmParser, baseJavaDir, luaTeavmPath + "/src/main/java/");
+        }
 
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
-
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
-            targets.add(getWindowBuildTarget());
+            targets.add(getWindowBuildTarget(cppBuildPath));
         }
         targets.add(getEmscriptenStaticBuildTarget(idlReader));
 
+        BuildConfig buildConfig = new BuildConfig(cppDestinationPath, cppBuildPath, libsDir, libName);
         JBuilder.build(buildConfig, targets);
     }
 
-    private static BuildMultiTarget getWindowBuildTarget() throws IOException {
+    private static BuildMultiTarget getWindowBuildTarget(String cppBuildPath) throws IOException {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        String buildPath = new File("build/c++/").getCanonicalPath().replace("\\", "/");
         WindowsTarget windowsTarget = new WindowsTarget();
+        windowsTarget.addJNIHeaders();
         windowsTarget.headerDirs.add("-Isrc/sol2");
         windowsTarget.headerDirs.add("-Isrc/lua");
-        windowsTarget.linkerFlags.add(buildPath + "/libs/windows/lua64.a");
+        windowsTarget.cppInclude.add(cppBuildPath + "/src/jniglue/JNIGlue.cpp");
+        windowsTarget.linkerFlags.add(cppBuildPath + "/libs/windows/lua64.a");
         windowsTarget.cppFlags.add("-DSOL_USING_CXX_LUA");
         multiTarget.add(windowsTarget);
         return multiTarget;

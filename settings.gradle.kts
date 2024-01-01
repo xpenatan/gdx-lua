@@ -1,9 +1,9 @@
 // Core
-include(":lua:base")
-include(":lua:builder")
-include(":lua:core")
-include(":lua:desktop")
-include(":lua:teavm")
+include(":lua:lua-base")
+include(":lua:lua-build")
+include(":lua:lua-core")
+include(":lua:lua-desktop")
+include(":lua:lua-teavm")
 
 // Examples
 include(":examples:basic:core")

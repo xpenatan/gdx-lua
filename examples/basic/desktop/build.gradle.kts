@@ -1,7 +1,7 @@
 dependencies {
     implementation(project(":examples:basic:core"))
 
-    implementation(project(":lua:desktop"))
+    implementation(project(":lua:lua-desktop"))
 
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")

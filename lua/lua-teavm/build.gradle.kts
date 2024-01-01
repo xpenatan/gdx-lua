@@ -1,6 +1,6 @@
-val moduleName = "teavm"
+val moduleName = "lua-teavm"
 
-val emscriptenFile = "$projectDir/../builder/build/c++/libs/emscripten/gdx_lua.wasm.js"
+val emscriptenFile = "$projectDir/../lua-build/build/c++/libs/emscripten/gdx_lua.wasm.js"
 
 tasks.jar {
     from(emscriptenFile)

@@ -8,7 +8,7 @@ plugins {
 val mainClassName = "Main"
 
 dependencies {
-    implementation(project(":lua:base"))
+    implementation(project(":lua:lua-base"))
     implementation("com.github.xpenatan.jParser:core:${LibExt.jParserVersion}")
     implementation("com.github.xpenatan.jParser:builder:${LibExt.jParserVersion}")
     implementation("com.github.xpenatan.jParser:teavm:${LibExt.jParserVersion}")

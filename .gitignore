@@ -32,6 +32,6 @@ libs/
 *.o
 *.ini
 
-**/lua/core/src/main/java/**
-**/lua/teavm/src/main/java/**
+**/lua/lua-core/src/main/java/**
+**/lua/lua-teavm/src/main/java/**
 **/webapp/**

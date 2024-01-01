@@ -1,4 +1,4 @@
-val moduleName = "core"
+val moduleName = "lua-core"
 
 dependencies {
     implementation("com.github.xpenatan.jParser:loader-core:${LibExt.jParserVersion}")
