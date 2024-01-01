@@ -97,8 +97,8 @@ public:
     void x_lua_pushfstring(const char* fmt)                    { lua_pushfstring(L, fmt); }
     void x_lua_pushglobaltable()                               { lua_pushglobaltable(L); }
     void x_lua_pushinteger(long long n)                        { lua_pushinteger(L, n); }
-
-    void x_lua_pushlstring(const char* s, int len)             { lua_pushlstring(L, s, len); }
+    //const char* x_lua_pushliteral(const char* s)               { return lua_pushliteral(L, s); }
+    const std::string x_lua_pushlstring(const char* s, int len)      { return lua_pushlstring(L, s, len); }
     void x_lua_pushnil()                                       { lua_pushnil(L); }
     void x_lua_pushnumber(double n)                            { lua_pushnumber(L, n); }
     void x_lua_pushstring(const char* s)                       { lua_pushstring(L, s); }

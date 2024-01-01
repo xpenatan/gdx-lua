@@ -49,8 +49,8 @@ interface LuaState {
     void x_lua_pushfstring([Const] DOMString fmt);
     void x_lua_pushglobaltable();
     void x_lua_pushinteger(long long n);
-
-    void x_lua_pushlstring([Const] DOMString s, long len);
+//    IDLString x_lua_pushliteral([Const] DOMString s);
+    [Const, Value] IDLString x_lua_pushlstring([Const] DOMString s, long len);
     void x_lua_pushnil();
     void x_lua_pushnumber(double n);
     void x_lua_pushstring([Const] DOMString s);
