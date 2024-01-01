@@ -26,6 +26,7 @@ interface LuaState {
     long x_lua_isfunction(long index);
     long x_lua_isinteger(long index);
     long x_lua_islightuserdata(long index);
+    long x_lua_isnil(long index);
     long x_lua_isnone(long index);
     long x_lua_isnoneornil(long index);
     long x_lua_isnumber(long index);
@@ -97,6 +98,8 @@ interface LuaState {
     void x_lua_warning([Const] DOMString msg, long tocont);
 
     long  x_lua_yield(long nresults);
+
+    void x_luaL_checktype(long arg, long t);
 
     // #### END LOW LEVEL LUA METHODS
 

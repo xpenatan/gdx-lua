@@ -74,6 +74,7 @@ public:
     int x_lua_isfunction(int index)                            { return lua_isfunction(L, index); }
     int x_lua_isinteger(int index)                             { return lua_isinteger(L, index); }
     int x_lua_islightuserdata(int index)                       { return lua_islightuserdata(L, index); }
+    int x_lua_isnil(int index)                                 { return lua_isnil(L, index); }
     int x_lua_isnone(int index)                                { return lua_isnone(L, index); }
     int x_lua_isnoneornil(int index)                           { return lua_isnoneornil(L, index); }
     int x_lua_isnumber(int index)                              { return lua_isnumber(L, index); }
@@ -146,6 +147,8 @@ public:
     void x_lua_warning(const char* msg, int tocont)            { lua_warning(L, msg, tocont); }
 
     int x_lua_yield(int nresults)                              { return lua_yield(L, nresults); }
+
+    void x_luaL_checktype(int arg, int t)                              { luaL_checktype(L, arg, t); }
 
     // #### END LOW LEVEL LUA METHODS
 
