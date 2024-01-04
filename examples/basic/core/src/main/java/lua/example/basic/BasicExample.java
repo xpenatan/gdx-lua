@@ -40,9 +40,12 @@ public class BasicExample extends ImGuiRenderer {
         lua = new LuaState();
         lua.createContext();
 
-        lua.registerFunction("beep", new LuaFunction() {
+        lua.x_lua_pushinteger(20);
+        lua.x_lua_pushcclosure(new LuaFunction() {
             @Override
             public int onCall(LuaState luaState) {
+                int value = lua.x_lua_tointeger(lua.x_lua_upvalueindex(2));
+
                 int params = luaState.x_lua_gettop();
                 lua.idl.helper.IDLString idlString = luaState.x_lua_tostring(1);
 //                int value = luaState.x_lua_tointeger(1);
@@ -51,17 +54,42 @@ public class BasicExample extends ImGuiRenderer {
                 int paramType2 = luaState.x_lua_type(2);
                 int paramType3 = luaState.x_lua_type(3);
 
+                System.out.println("value: " + value);
                 System.out.println("Beep is called: param: " + params);
                 System.out.println("Beep is called: value: " + idlString.c_str());
                 System.out.println("paramType1: " + paramType1);
                 System.out.println("paramType2: " + paramType2);
                 System.out.println("paramType3: " + paramType3);
-
                 return 0;
             }
-        });
+        }, 1);
+        lua.x_lua_setglobal("beep");
 
-        ScriptState state = lua.script("beepp(\"HELLO\")");
+//        lua.registerFunction("beep", new LuaFunction() {
+//            @Override
+//            public int onCall(LuaState luaState) {
+//                int params = luaState.x_lua_gettop();
+//                lua.idl.helper.IDLString idlString = luaState.x_lua_tostring(1);
+////                int value = luaState.x_lua_tointeger(1);
+//
+//                int paramType1 = luaState.x_lua_type(1);
+//                int paramType2 = luaState.x_lua_type(2);
+//                int paramType3 = luaState.x_lua_type(3);
+//
+//                System.out.println("Beep is called: param: " + params);
+//                System.out.println("Beep is called: value: " + idlString.c_str());
+//                System.out.println("paramType1: " + paramType1);
+//                System.out.println("paramType2: " + paramType2);
+//                System.out.println("paramType3: " + paramType3);
+//                return 0;
+//            }
+//        });
+
+        lua.setInt("myVar", 10);
+
+        lua.stackDump();
+
+        ScriptState state = lua.script("beep(\"HELLO\")");
 
         if(!state.get_isValid()) {
             String error = state.get_rawErrorText().c_str();

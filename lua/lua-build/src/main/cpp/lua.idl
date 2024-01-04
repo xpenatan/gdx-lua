@@ -46,9 +46,13 @@ interface LuaState {
     void x_lua_pop(long n);
     void x_lua_pushboolean(long b);
 
+    // Upvalue starts at index 2
+    void x_lua_pushcclosure(LuaFunction callback, long n);
+    void x_lua_pushcfunction(LuaFunction callback);
     void x_lua_pushfstring([Const] DOMString fmt);
     void x_lua_pushglobaltable();
     void x_lua_pushinteger(long long n);
+    void x_lua_pushlightuserdata(any n);
 //    IDLString x_lua_pushliteral([Const] DOMString s);
     [Const, Value] IDLString x_lua_pushlstring([Const] DOMString s, long len);
     void x_lua_pushnil();
@@ -70,36 +74,57 @@ interface LuaState {
     void x_lua_rotatee(long index, long n);
 
     void x_lua_setfield(long index, [Const] DOMString k);
-    void x_lua_setglobal(long index, [Const] DOMString name);
+    void x_lua_setglobal([Const] DOMString name);
     void x_lua_seti(long index, long long n);
     long x_lua_setuservalue(long index);
     long x_lua_setiuservalue(long index, long n);
     long x_lua_setmetatable(long index);
     void x_lua_settable(long index);
     void x_lua_settop(long index);
-
+//    void lua_setwarnf (lua_State *L, lua_WarnFunction f, void *ud);
     long x_lua_status();
     unsigned long x_lua_stringtonumber([Const] DOMString s);
     long x_lua_toboolean(long index);
-
+//    lua_CFunction lua_tocfunction (lua_State *L, int index);
     void x_lua_toclose(long index);
     long long x_lua_tointeger(long index);
-
+//    lua_Integer lua_tointegerx (lua_State *L, int index, int *isnum);
 //    [Const, Value] IDLString x_lua_tolstring(long index, size_t* len);
     double x_lua_tonumber(long index);
-
+//    lua_Number lua_tonumberx (lua_State *L, int index, int *isnum);
+//    const void *lua_topointer (lua_State *L, int index);
     [Const, Value] IDLString x_lua_tostring(long index);
-
+//    lua_State *lua_tothread (lua_State *L, int index);
+    any x_lua_touserdata(long index);
     long x_lua_type(long index);
     [Const, Value] IDLString x_lua_typename(long tp);
-
     long x_lua_upvalueindex(long i);
     double x_lua_version();
     void x_lua_warning([Const] DOMString msg, long tocont);
 
     long  x_lua_yield(long nresults);
 
+    // ### LUAL methods
+
+    void x_luaL_checkversion();
+    void x_luaL_checkany(long arg);
+    long long x_luaL_checkinteger(long arg);
+    double x_luaL_checknumber(long arg);
+    [Const, Value] IDLString x_luaL_checkstring(long arg);
     void x_luaL_checktype(long arg, long t);
+
+    long x_luaL_newmetatable([Const] DOMString tname);
+    long x_luaL_getmetafield(long obj, [Const] DOMString e);
+    long x_luaL_getmetatable([Const] DOMString tname);
+    long x_luaL_getsubtable(long idx, [Const] DOMString fname);
+
+    long long x_luaL_len(long index);
+
+    void x_luaL_pushfail();
+
+    long x_luaL_ref(long t);
+    void x_luaL_unref(long t, long ref);
+    long x_luaL_typeerror(long arg, [Const] DOMString tname);
 
     // #### END LOW LEVEL LUA METHODS
 
@@ -120,6 +145,8 @@ interface LuaState {
     void setString(DOMString key, DOMString value);
 
     void registerFunction(DOMString key, LuaFunction callback);
+
+    void stackDump();
 
     static void setIntToVoid(any pointer, long value);
     static long getIntFromVoid(any pointer);

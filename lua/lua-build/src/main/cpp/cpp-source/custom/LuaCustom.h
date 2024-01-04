@@ -35,7 +35,13 @@ class LuaFunction
 static int lua_function(lua_State* L) {
     intptr_t* data = (intptr_t*)lua_touserdata(L, lua_upvalueindex(1));
     LuaFunction* function = reinterpret_cast<LuaFunction*>(*data);
-    return function->onCall(function->lua); /* number of results */
+    return function->onCall(function->lua);
+}
+
+static int lua_function2(lua_State* L) {
+    auto  ptr = lua_tointeger(L, lua_upvalueindex(1));
+    LuaFunction* function = reinterpret_cast<LuaFunction*>(ptr);
+    return function->onCall(function->lua);
 }
 
 class LuaState {
@@ -93,12 +99,27 @@ public:
 
     void x_lua_pop(int n)                                      { lua_pop(L, n); }
     void x_lua_pushboolean(int b)                              { lua_pushboolean(L, b); }
+    void x_lua_pushcclosure(LuaFunction* callback, int n) {
+        callback->lua = this;
+        auto pointer = reinterpret_cast<std::uintptr_t>(callback);
+        lua_pushinteger(L, pointer);
+        int top = lua_gettop(L);
+        lua_rotate(L, -top, 1);
+        lua_pushcclosure(L, lua_function2, 1 + n);
+    }
+    void x_lua_pushcfunction(LuaFunction* callback) {
+        callback->lua = this;
+        auto pointer = reinterpret_cast<std::uintptr_t>(callback);
+        lua_pushinteger(L, pointer);
+        lua_pushcclosure(L, &lua_function2, 1);;
+    }
 
     void x_lua_pushfstring(const char* fmt)                    { lua_pushfstring(L, fmt); }
     void x_lua_pushglobaltable()                               { lua_pushglobaltable(L); }
     void x_lua_pushinteger(long long n)                        { lua_pushinteger(L, n); }
+    void x_lua_pushlightuserdata(void *p)                      { lua_pushlightuserdata(L, p); }
     //const char* x_lua_pushliteral(const char* s)               { return lua_pushliteral(L, s); }
-    const std::string x_lua_pushlstring(const char* s, int len)      { return lua_pushlstring(L, s, len); }
+    const std::string x_lua_pushlstring(const char* s, int len){ return lua_pushlstring(L, s, len); }
     void x_lua_pushnil()                                       { lua_pushnil(L); }
     void x_lua_pushnumber(double n)                            { lua_pushnumber(L, n); }
     void x_lua_pushstring(const char* s)                       { lua_pushstring(L, s); }
@@ -118,10 +139,10 @@ public:
     void x_lua_rotatee(int index, int n)                       { lua_rotate(L, index, n); }
 
     void x_lua_setfield(int index, const char* k)              { lua_setfield(L, index, k); }
-    void x_lua_setglobal(int index, const char* name)          { lua_setglobal(L, name); }
+    void x_lua_setglobal(const char* name)                     { lua_setglobal(L, name); }
     void x_lua_seti(int index, lua_Integer n)                  { lua_seti(L, index, n); }
 
-    int x_lua_setuservalue(int index)                            { return lua_setuservalue(L, index); }
+    int x_lua_setuservalue(int index)                          { return lua_setuservalue(L, index); }
     int x_lua_setiuservalue(int index, int n)                  { return lua_setiuservalue(L, index, n); }
     int x_lua_setmetatable(int index)                          { return lua_setmetatable(L, index); }
     void x_lua_settable(int index)                             { lua_settable(L, index); }
@@ -139,6 +160,7 @@ public:
 
     const std::string x_lua_tostring(int index)                { return lua_tostring(L, index); }
 
+    void* x_lua_touserdata(int index)                          { return lua_touserdata(L, index); }
     int x_lua_type(int index)                                  { return lua_type(L, index); }
     const std::string x_lua_typename(int tp)                   { return lua_typename(L, tp); }
 
@@ -148,7 +170,27 @@ public:
 
     int x_lua_yield(int nresults)                              { return lua_yield(L, nresults); }
 
-    void x_luaL_checktype(int arg, int t)                              { luaL_checktype(L, arg, t); }
+    // ### LUAL methods
+
+    void x_luaL_checkversion()                                 { luaL_checkversion(L); }
+    void x_luaL_checkany(int arg)                              { luaL_checkany(L, arg); }
+    long long x_luaL_checkinteger(int arg)                     { return luaL_checkinteger(L, arg); }
+    double x_luaL_checknumber(int arg)                         { return luaL_checknumber(L, arg); }
+    std::string x_luaL_checkstring(int arg)                    { return luaL_checkstring(L, arg); }
+    void x_luaL_checktype(int arg, int t)                      { luaL_checktype(L, arg, t); }
+
+    int x_luaL_newmetatable(const char* tname)                 { return luaL_newmetatable(L, tname); }
+    int x_luaL_getmetafield(int obj, const char* e)            { return luaL_getmetafield(L, obj, e); }
+    int x_luaL_getmetatable(const char* tname)                 { return luaL_getmetatable(L, tname); }
+    int x_luaL_getsubtable(int idx, const char* fname)         { return luaL_getsubtable(L, idx, fname); }
+
+    lua_Integer x_luaL_len(int index)                          { return luaL_len(L, index); }
+
+    void x_luaL_pushfail()                                     { luaL_pushfail(L); }
+
+    int x_luaL_ref(int t)                                      { return luaL_ref(L, t); }
+    void x_luaL_unref(int t, int ref)                          { luaL_unref(L, t, ref); }
+    int x_luaL_typeerror(int arg, const char* tname)           { return luaL_typeerror(L, arg, tname); }
 
     // #### END LOW LEVEL LUA METHODS
 
@@ -251,6 +293,35 @@ public:
         }
         lua_pop(L, 1);                 // remove global table(-1)
     }
+
+    void stackDump() {
+        int i;
+        int top = lua_gettop(L); /* depth of the stack */
+        for (i = 1; i <= top; i++) { /* repeat for each level */
+            int t = lua_type(L, i);
+            switch (t) {
+            case LUA_TSTRING: { /* strings */
+                printf("'%s'", lua_tostring(L, i));
+                break;
+            }
+            case LUA_TBOOLEAN: { /* Booleans */
+                printf(lua_toboolean(L, i) ? "true" : "false");
+                break;
+            }
+            case LUA_TNUMBER: { /* numbers */
+                printf("%g", lua_tonumber(L, i));
+                break;
+            }
+            default: { /* other values */
+                printf("%s", lua_typename(L, t));
+                break;
+            }
+            }
+            printf(" "); /* put a separator */
+        }
+        printf("\n"); /* end the listing */
+    }
+
 
     static void setIntToVoid(void * pointer, int value) {
       int * data = (int *) pointer;
