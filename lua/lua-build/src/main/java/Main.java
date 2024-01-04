@@ -49,12 +49,22 @@ public class Main {
 
         {
             CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath, false);
-            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir);
+            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir) {
+                @Override
+                public String getIDLMethodName(String name) {
+                    return getMethod(name);
+                }
+            };
             cppParser.generateClass = true;
             JParser.generate(cppParser, baseJavaDir, luaCorePath + "/src/main/java");
         }
         {
-            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir);
+            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir) {
+                @Override
+                public String getIDLMethodName(String name) {
+                    return getMethod(name);
+                }
+            };
             JParser.generate(teavmParser, baseJavaDir, luaTeavmPath + "/src/main/java/");
         }
 
@@ -66,6 +76,13 @@ public class Main {
 
         BuildConfig buildConfig = new BuildConfig(cppDestinationPath, cppBuildPath, libsDir, libName);
         JBuilder.build(buildConfig, targets);
+    }
+
+    private static String getMethod(String name) {
+        if(name.startsWith("x_")) {
+            name = name.replace("x_", "");
+        }
+        return name;
     }
 
     private static BuildMultiTarget getWindowBuildTarget(String cppBuildPath) throws IOException {
