@@ -30,7 +30,7 @@ public class Main {
         String luaPath = new File("./../").getCanonicalPath().replace("\\", "/");
         String luaBasePath = luaPath + "/lua-base";
         String luaBuildPath = luaPath + "/lua-build";
-        String luaCorePath = luaPath + "/lua-core";
+        String luaCorePath = luaPath + "/lua-gen";
         String luaTeavmPath = luaPath + "/lua-teavm";
 
         String idlPath = luaBuildPath + "/src/main/cpp/lua.idl";

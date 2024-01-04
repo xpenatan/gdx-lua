@@ -6,6 +6,11 @@ tasks.jar {
     from(windowsFile)
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
