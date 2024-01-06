@@ -33,7 +33,7 @@ public class BuildLua {
 
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
             targets.add(getStaticLuaWindowBuildTarget());
-//            targets.add(getEmscriptenStaticBuildTarget());
+            targets.add(getEmscriptenStaticBuildTarget());
         }
 
         JBuilder.build(buildConfig, targets);
@@ -58,7 +58,6 @@ public class BuildLua {
         windowsTarget.cppExclude.add("**/lua/onelua.c");
         windowsTarget.cppFlags.add("-DLUA_COMPAT_5_3");
         windowsTarget.cppFlags.add("-Dl_noret=void");
-//        windowsTarget.cppFlags.add("-DLUA_USE_LONGJMP");
         multiTarget.add(windowsTarget);
 
         return multiTarget;
@@ -69,15 +68,15 @@ public class BuildLua {
 
         // Make a static library
         EmscriptenTarget libTarget = new EmscriptenTarget(null);
-//        libTarget.cppCompiler.clear();
-//        libTarget.linkerCompiler.clear();
-//        String cppCompilerr = EmscriptenTarget.EMSCRIPTEN_ROOT + "emcc";
-//        if(BuildTarget.isWindows()) {
-//            cppCompilerr += ".bat";
-//        }
-//        libTarget.cppCompiler.add(cppCompilerr);
-//        libTarget.linkerCompiler.add(cppCompilerr);
-//        libTarget.cppFlags.remove("-std=c++17");
+        libTarget.cppCompiler.clear();
+        libTarget.linkerCompiler.clear();
+        String cppCompilerr = EmscriptenTarget.EMSCRIPTEN_ROOT + "emcc";
+        if(BuildTarget.isWindows()) {
+            cppCompilerr += ".bat";
+        }
+        libTarget.cppCompiler.add(cppCompilerr);
+        libTarget.linkerCompiler.add(cppCompilerr);
+        libTarget.cppFlags.remove("-std=c++17");
 
         libTarget.isStatic = true;
         libTarget.compileGlueCode = false;
@@ -89,7 +88,6 @@ public class BuildLua {
         libTarget.cppExclude.add("**/lua/onelua.c");
         libTarget.cppFlags.add("-DLUA_COMPAT_5_3");
         libTarget.cppFlags.add("-Dl_noret=void");
-//        libTarget.cppFlags.add("-DLUA_USE_LONGJMP");
         multiTarget.add(libTarget);
 
         return multiTarget;

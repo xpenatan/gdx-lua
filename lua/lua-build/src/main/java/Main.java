@@ -70,7 +70,7 @@ public class Main {
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
             targets.add(getWindowBuildTarget(cppBuildPath));
-//            targets.add(getEmscriptenStaticBuildTarget(idlReader));
+            targets.add(getEmscriptenStaticBuildTarget(idlReader));
         }
 
         BuildConfig buildConfig = new BuildConfig(cppDestinationPath, cppBuildPath, libsDir, libName);
