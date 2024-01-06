@@ -1,5 +1,6 @@
 package lua.example.basic;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import imgui.ImGui;
@@ -10,7 +11,6 @@ import imgui.idl.helper.IDLString;
 import lua.Lua;
 import lua.LuaFunction;
 import lua.LuaState;
-import lua.ScriptState;
 import lua.example.basic.imgui.ImGuiRenderer;
 
 public class BasicExample extends ImGuiRenderer {
@@ -27,44 +27,39 @@ public class BasicExample extends ImGuiRenderer {
 
         LanguageDefinition languageDefinition = LanguageDefinition.Lua();
         editor.SetLanguageDefinition(languageDefinition);
+
+        String code = Gdx.files.internal("data/script.lua").readString();
         IDLString text = new IDLString();
-        String code = "\n" +
-                "function onCreate()\n" +
-                "\n" +
-                "end\n" +
-                "\n\n" +
-                "function onRender(delta)\n" +
-                "\n" +
-                "end\n";
         text.append(code);
         editor.SetText(text);
         lua = new Lua();
 
-        lua.registerGlobalFunction("beep", new LuaFunction() {
+        lua.registerGlobalFunction("import", new LuaFunction() {
             @Override
             public int onCall(LuaState luaState) {
-                int params = luaState.lua_gettop();
-                lua.idl.helper.IDLString idlString = luaState.lua_tostring(1);
-//                int value = luaState.x_lua_tointeger(1);
+                long cPointer1 = luaState.getCPointer();
 
-                int paramType1 = luaState.lua_type(1);
-                int paramType2 = luaState.lua_type(2);
-                int paramType3 = luaState.lua_type(3);
+                System.out.println("cPointer1: " + cPointer1);
 
-                System.out.println("Beep is called: param: " + params);
-                System.out.println("Beep is called: value: " + idlString.c_str());
-                System.out.println("paramType1: " + paramType1);
-                System.out.println("paramType2: " + paramType2);
-                System.out.println("paramType3: " + paramType3);
-                return 0;
+
+//                int params = luaState.lua_gettop();
+//                if(params != 1) {
+//                    luaState.luaL_argerror(1, "Only accept String argument");
+
+
+
+                    luaState.luaL_error("ERROR");
+                    return 1;
+//                }
+//                return 1;
             }
         });
 
-        ScriptState state = lua.script("beep(\"HELLO\")");
+        Lua.ScriptStatus scriptStatus = lua.runScript(code);
 
-        if(!state.get_isValid()) {
-            String error = state.get_rawErrorText().c_str();
-            System.out.println("test: " + error);
+        if(!scriptStatus.isValid()) {
+            String error = scriptStatus.getError();
+            System.err.println(error);
         }
 
         lua.dispose();

@@ -11,7 +11,7 @@ interface LuaState {
     void x_lua_concat(long op, long n);
     void x_lua_copy(long fromidx, long toidx);
     void x_lua_createtabble(long narr, long nrec);
-    long x_lua_error();
+//    long x_lua_error();
     long x_lua_getfield(long index, [Const] DOMString k);
 
     long x_lua_getglobal([Const] DOMString name);
@@ -42,6 +42,9 @@ interface LuaState {
     any x_lua_newuserdata(unsigned long size);
     any x_lua_newuserdatauv(unsigned long size, long nuvalue);
     long x_lua_next(long index);
+
+    void x_lua_call(long nargs, long nresults);
+    long x_lua_pcall(long nargs, long nresults, long msgh);
 
     void x_lua_pop(long n);
     void x_lua_pushboolean(long b);
@@ -106,12 +109,12 @@ interface LuaState {
 
     // ### LUAL methods
 
+    long x_luaL_loadstring([Const] DOMString s);
+
+    void x_luaL_error([Const] DOMString fmt);
+    void x_luaL_argerror(long arg, [Const] DOMString extramsg);
+
     void x_luaL_checkversion();
-    void x_luaL_checkany(long arg);
-    long long x_luaL_checkinteger(long arg);
-    double x_luaL_checknumber(long arg);
-    [Const, Value] IDLString x_luaL_checkstring(long arg);
-    void x_luaL_checktype(long arg, long t);
 
     long x_luaL_newmetatable([Const] DOMString tname);
     long x_luaL_getmetafield(long obj, [Const] DOMString e);
@@ -131,21 +134,6 @@ interface LuaState {
     void createContext();
     void destroyContext();
 
-    void collectGarbage();
-
-    [Const, Value] ScriptState script(DOMString code);
-    long getOrInt(DOMString key, long otherwise);
-    float getOrFloat(DOMString key, float otherwise);
-    boolean getOrBool(DOMString key, boolean otherwise);
-    [Const, Value] IDLString getOrString(DOMString key, DOMString otherwise);
-
-    void setInt(DOMString key, long value);
-    void setFloat(DOMString key, float value);
-    void setBool(DOMString key, boolean value);
-    void setString(DOMString key, DOMString value);
-
-    void registerFunction(DOMString key, LuaFunction callback);
-
     void stackDump();
 
     static void setIntToVoid(any pointer, long value);
@@ -160,10 +148,4 @@ interface LuaFunction {
 interface LuaFunctionImpl {
     void LuaFunctionImpl();
     long onCall(LuaState luaState);
-};
-
-interface ScriptState {
-    [Value] attribute IDLString errorText;
-    [Value] attribute IDLString rawErrorText;
-    attribute boolean isValid;
 };

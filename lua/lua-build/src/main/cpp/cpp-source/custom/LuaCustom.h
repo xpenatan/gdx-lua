@@ -1,8 +1,12 @@
 #pragma once
 
-#define SOL_DEFAULT_PASS_ON_ERROR 1
-#include <sol/sol.hpp>
-#include <iostream>
+extern "C" {
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
+#include <cstdint>
 #include <string>
 
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
@@ -15,11 +19,6 @@ const char GLOBAL_TABLE_FUNCTIONS[] = "__cppfunction__";
 
 class LuaState;
 
-struct ScriptState {
-    std::string errorText;
-    std::string rawErrorText;
-    bool isValid;
-};
 
 class LuaFunction
 {
@@ -32,17 +31,10 @@ class LuaFunction
         virtual int onCall(LuaState* luaState) = 0;
 };
 
-static int lua_function(lua_State* L) {
-    intptr_t* data = (intptr_t*)lua_touserdata(L, lua_upvalueindex(1));
-    LuaFunction* function = reinterpret_cast<LuaFunction*>(*data);
-    return function->onCall(function->lua);
-}
 
-static int lua_function2(lua_State* L) {
-    auto  ptr = lua_tointeger(L, lua_upvalueindex(1));
-    LuaFunction* function = reinterpret_cast<LuaFunction*>(ptr);
-    return function->onCall(function->lua);
-}
+static int lua_function(lua_State* L);
+static int lua_function2(lua_State* L);
+static int lua_panic(lua_State* L);
 
 class LuaState {
 
@@ -96,9 +88,11 @@ public:
     void* x_lua_newuserdata(size_t size)                       { return lua_newuserdata(L, size); }
     void* x_lua_newuserdatauv(size_t size, int nuvalue)        { return lua_newuserdatauv(L, size, nuvalue); }
     int x_lua_next(int index)                                  { return lua_next(L, index); }
-
+    void x_lua_call(int nargs, int nresults)                   { lua_call(L, nargs, nresults); }
+    int x_lua_pcall(int nargs, int nresults, int msgh)         { return lua_pcall(L, nargs, nresults, msgh); }
     void x_lua_pop(int n)                                      { lua_pop(L, n); }
     void x_lua_pushboolean(int b)                              { lua_pushboolean(L, b); }
+
     void x_lua_pushcclosure(LuaFunction* callback, int n) {
         callback->lua = this;
         auto pointer = reinterpret_cast<std::uintptr_t>(callback);
@@ -111,7 +105,7 @@ public:
         callback->lua = this;
         auto pointer = reinterpret_cast<std::uintptr_t>(callback);
         lua_pushinteger(L, pointer);
-        lua_pushcclosure(L, &lua_function2, 1);;
+        lua_pushcclosure(L, &lua_function2, 1);
     }
 
     void x_lua_pushfstring(const char* fmt)                    { lua_pushfstring(L, fmt); }
@@ -172,12 +166,17 @@ public:
 
     // ### LUAL methods
 
-    void x_luaL_checkversion()                                 { luaL_checkversion(L); }
-    void x_luaL_checkany(int arg)                              { luaL_checkany(L, arg); }
-    long long x_luaL_checkinteger(int arg)                     { return luaL_checkinteger(L, arg); }
-    double x_luaL_checknumber(int arg)                         { return luaL_checknumber(L, arg); }
-    std::string x_luaL_checkstring(int arg)                    { return luaL_checkstring(L, arg); }
-    void x_luaL_checktype(int arg, int t)                      { luaL_checktype(L, arg, t); }
+    int x_luaL_loadstring(const char* s)                       { return luaL_loadstring(L, s); }
+
+
+    const char* lastLuaLError = NULL;
+    void x_luaL_error(const char* fmt)                         { lastLuaLError = fmt; }
+    const char* lastLuaLArgError = NULL;
+    int intArg = 0;
+    void x_luaL_argerror(int arg, const char* extramsg)        { lastLuaLArgError = extramsg; intArg = arg; }
+
+    bool checkVersion = false;
+    void x_luaL_checkversion()                                 { checkVersion = true; }
 
     int x_luaL_newmetatable(const char* tname)                 { return luaL_newmetatable(L, tname); }
     int x_luaL_getmetafield(int obj, const char* e)            { return luaL_getmetafield(L, obj, e); }
@@ -197,6 +196,7 @@ public:
     void createContext() {
         L = luaL_newstate();
         luaL_openlibs(L);
+        lua_atpanic(L, &lua_panic);
     }
 
     void destroyContext() {
@@ -204,68 +204,6 @@ public:
             lua_close(L);
             L = NULL;
         }
-    }
-
-    void collectGarbage() {
-        sol::state_view lua(L);
-        lua.collect_garbage();
-    }
-
-    const ScriptState script(const char* code) {
-        sol::state_view lua(L);
-        sol::protected_function_result result = lua.safe_script(code);
-        ScriptState scriptState;
-        sol::call_status status = result.status();
-        scriptState.isValid = status == sol::call_status::ok;
-        if (!scriptState.isValid) {
-            sol::type t = sol::type_of(L, result.stack_index());
-
-            scriptState.errorText = "Lua: ";
-            scriptState.errorText += to_string(status);
-            scriptState.errorText += " error";
-
-            if (t == sol::type::string) {
-                scriptState.errorText += ": ";
-                sol::string_view serr = sol::stack::unqualified_get<sol::string_view>(L, result.stack_index());
-                scriptState.rawErrorText.append(serr.data(), serr.size());
-                scriptState.errorText = scriptState.rawErrorText;
-            }
-        }
-        return scriptState;
-    }
-
-    int getOrInt(const char* key, int otherwise) {
-        sol::state_view lua(L);
-        return lua.get_or(key, otherwise);
-    }
-    float getOrFloat(const char* key, float otherwise) {
-        sol::state_view lua(L);
-        return lua.get_or(key, otherwise);
-    }
-    bool getOrBool(const char* key, bool otherwise) {
-        sol::state_view lua(L);
-        return lua.get_or(key, otherwise);
-    }
-    const std::string getOrString(const char* key, const char* otherwise) {
-        sol::state_view lua(L);
-        return lua.get_or(key, otherwise);
-    }
-
-    void setInt(const char* key, int value) {
-        sol::state_view lua(L);
-        lua.set(key, value);
-    }
-    void setFloat(const char* key, float value) {
-        sol::state_view lua(L);
-        lua.set(key, value);
-    }
-    void setBool(const char* key, bool value) {
-        sol::state_view lua(L);
-        lua.set(key, value);
-    }
-    void setString(const char* key, const char* value) {
-        sol::state_view lua(L);
-        lua.set(key, value);
     }
 
     void registerFunction(const char* key, LuaFunction* callback) {
@@ -278,20 +216,6 @@ public:
         lua_setmetatable(L, -2);
         lua_pushcclosure(L, &lua_function, 1);
         lua_setglobal((lua_State*)L, (const char*)key);
-    }
-
-    void printTable() {
-        lua_pushglobaltable(L);       // Get global table
-        lua_pushnil(L);               // put a nil key on stack
-        while (lua_next(L, -2) != 0) { // key(-1) is replaced by the next key(-1) in table(-2)
-            const char* name = lua_tostring(L, -2);  // Get key(-2) name
-
-            std::cout << "name: " << name << std::endl;
-
-
-            lua_pop(L, 1);               // remove value(-1), now key on top at(-1)
-        }
-        lua_pop(L, 1);                 // remove global table(-1)
     }
 
     void stackDump() {
@@ -322,7 +246,6 @@ public:
         printf("\n"); /* end the listing */
     }
 
-
     static void setIntToVoid(void * pointer, int value) {
       int * data = (int *) pointer;
       *data = value;
@@ -333,3 +256,44 @@ public:
       return *data;
     }
 };
+
+static int lua_panic(lua_State* L) {
+    printf("PANIC ERROR");
+    return 1;
+}
+
+static void validate(lua_State* L, LuaState* lua) {
+    // Soluction to call erro after java call so the lua jump thing dont crash java.
+    if (lua->checkVersion) {
+        lua->checkVersion = false;
+        luaL_checkversion(L);
+    }
+    if (lua->lastLuaLError != NULL) {
+        const char* error = lua->lastLuaLError;
+        lua->lastLuaLError = NULL;
+        luaL_error(L, error);
+    }
+    else if (lua->lastLuaLArgError != NULL) {
+        const char* error = lua->lastLuaLArgError;
+        lua->lastLuaLArgError = NULL;
+        luaL_argerror(L, lua->intArg, error);
+    }
+}
+
+static int lua_function(lua_State* L) {
+    intptr_t* data = (intptr_t*)lua_touserdata(L, lua_upvalueindex(1));
+    LuaFunction* function = reinterpret_cast<LuaFunction*>(*data);
+    LuaState* lua = function->lua;
+    int retValue = function->onCall(lua);
+    validate(L, lua);
+    return retValue;
+}
+
+static int lua_function2(lua_State* L) {
+    auto  ptr = lua_tointeger(L, lua_upvalueindex(1));
+    LuaFunction* function = reinterpret_cast<LuaFunction*>(ptr);
+    LuaState* lua = function->lua;
+    int retValue = function->onCall(lua);
+    validate(L, lua);
+    return retValue;
+}

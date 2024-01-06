@@ -41,15 +41,14 @@ public class Main {
         String cppBuildPath = luaBuildPath + "/build/c++";
         String libsDir = cppBuildPath + "/libs/";
         String cppDestinationPath = cppBuildPath + "/src";
-        String libDestinationPath = cppDestinationPath + "/sol2";
+        String libDestinationPath = cppDestinationPath + "/lib";
 
-        FileHelper.copyDir(cppSourceDir, libDestinationPath);
         Path copyOut = new File(libDestinationPath).toPath();
         FileHelper.copyDir(new File("src/main/cpp/cpp-source/custom").toPath(), copyOut);
 
         {
             CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath, false);
-            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir) {
+            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, null) {
                 @Override
                 public String getIDLMethodName(String name) {
                     return getMethod(name);
@@ -59,7 +58,7 @@ public class Main {
             JParser.generate(cppParser, baseJavaDir, luaCorePath + "/src/main/java");
         }
         {
-            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir) {
+            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, null) {
                 @Override
                 public String getIDLMethodName(String name) {
                     return getMethod(name);
@@ -71,8 +70,8 @@ public class Main {
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
             targets.add(getWindowBuildTarget(cppBuildPath));
+//            targets.add(getEmscriptenStaticBuildTarget(idlReader));
         }
-        targets.add(getEmscriptenStaticBuildTarget(idlReader));
 
         BuildConfig buildConfig = new BuildConfig(cppDestinationPath, cppBuildPath, libsDir, libName);
         JBuilder.build(buildConfig, targets);
@@ -90,11 +89,10 @@ public class Main {
 
         WindowsTarget windowsTarget = new WindowsTarget();
         windowsTarget.addJNIHeaders();
-        windowsTarget.headerDirs.add("-Isrc/sol2");
+        windowsTarget.headerDirs.add("-Isrc/lib");
         windowsTarget.headerDirs.add("-Isrc/lua");
         windowsTarget.cppInclude.add(cppBuildPath + "/src/jniglue/JNIGlue.cpp");
         windowsTarget.linkerFlags.add(cppBuildPath + "/libs/windows/lua64.a");
-        windowsTarget.cppFlags.add("-DSOL_USING_CXX_LUA");
         multiTarget.add(windowsTarget);
         return multiTarget;
     }
@@ -103,11 +101,10 @@ public class Main {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
         EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
-        linkTarget.headerDirs.add("-Isrc/sol2");
+        linkTarget.headerDirs.add("-Isrc/lib");
         linkTarget.headerDirs.add("-Isrc/lua");
-        linkTarget.headerDirs.add("-includesrc/sol2/LuaCustom.h");
+        linkTarget.headerDirs.add("-includesrc/lib/LuaCustom.h");
         linkTarget.linkerFlags.add("../../libs/emscripten/lua.a");
-        linkTarget.cppFlags.add("-DSOL_USING_CXX_LUA");
         multiTarget.add(linkTarget);
 
         return multiTarget;
