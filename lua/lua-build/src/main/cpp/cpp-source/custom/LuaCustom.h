@@ -64,7 +64,6 @@ public:
     int x_lua_getmetatable(int index)                          { return lua_getmetatable(L, index); }
     int x_lua_gettable(int index)                              { return lua_gettable(L, index); }
     int x_lua_gettop()                                         { return lua_gettop(L); }
-    int x_lua_getuservalue(int index)                          { return lua_getuservalue(L, index); }
     int x_lua_getiuservalue(int index, int n)                  { return lua_getiuservalue(L, index, n); }
     void x_lua_insert(int index)                               { lua_insert(L, index); }
     int x_lua_isboolean(int index)                             { return lua_isboolean(L, index); }
@@ -108,7 +107,7 @@ public:
         lua_pushcclosure(L, &lua_function2, 1);
     }
 
-    void x_lua_pushfstring(const char* fmt)                    { lua_pushfstring(L, fmt); }
+    const std::string x_lua_pushfstring(const char* fmt)       { lua_pushfstring(L, fmt); }
     void x_lua_pushglobaltable()                               { lua_pushglobaltable(L); }
     void x_lua_pushinteger(long long n)                        { lua_pushinteger(L, n); }
     void x_lua_pushlightuserdata(void *p)                      { lua_pushlightuserdata(L, p); }

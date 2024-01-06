@@ -11,6 +11,7 @@ import imgui.idl.helper.IDLString;
 import lua.Lua;
 import lua.LuaFunction;
 import lua.LuaState;
+import lua.LuaTypes;
 import lua.example.basic.imgui.ImGuiRenderer;
 
 public class BasicExample extends ImGuiRenderer {
@@ -37,21 +38,24 @@ public class BasicExample extends ImGuiRenderer {
         lua.registerGlobalFunction("import", new LuaFunction() {
             @Override
             public int onCall(LuaState luaState) {
-                long cPointer1 = luaState.getCPointer();
+                int params = luaState.lua_gettop();
+                boolean argError = false;
 
-                System.out.println("cPointer1: " + cPointer1);
+                if(params != 1) {
+                    argError = true;
+                }
+                else {
+                    int argType = luaState.lua_type(1);
+                    if(argType != LuaTypes.LUA_TSTRING) {
+                        argError = true;
+                    }
+                }
+                if(argError) {
+                    luaState.luaL_error("Only accept a single String argument");
+                    return 0;
+                }
 
-
-//                int params = luaState.lua_gettop();
-//                if(params != 1) {
-//                    luaState.luaL_argerror(1, "Only accept String argument");
-
-
-
-                    luaState.luaL_error("ERROR");
-                    return 1;
-//                }
-//                return 1;
+                return 1;
             }
         });
 

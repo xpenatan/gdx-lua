@@ -56,7 +56,6 @@ public class BuildLua {
         windowsTarget.cppExclude.add("**/lua/lua.c");
         windowsTarget.cppExclude.add("**/lua/ltests.c");
         windowsTarget.cppExclude.add("**/lua/onelua.c");
-        windowsTarget.cppFlags.add("-DLUA_COMPAT_5_3");
         windowsTarget.cppFlags.add("-Dl_noret=void");
         multiTarget.add(windowsTarget);
 
@@ -86,7 +85,6 @@ public class BuildLua {
         libTarget.cppExclude.add("**/lua/lua.c");
         libTarget.cppExclude.add("**/lua/ltests.c");
         libTarget.cppExclude.add("**/lua/onelua.c");
-        libTarget.cppFlags.add("-DLUA_COMPAT_5_3");
         libTarget.cppFlags.add("-Dl_noret=void");
         multiTarget.add(libTarget);
 

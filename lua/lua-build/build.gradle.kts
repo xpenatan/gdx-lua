@@ -31,12 +31,12 @@ val sourceDestination = "$buildDir/lua/"
 tasks.register<Download>("download_source_lua") {
     group = "lua"
     description = "Download lua source"
-    src("https://github.com/lua/lua/archive/refs/tags/v5.4.4.zip")
+    src("https://github.com/lua/lua/archive/refs/tags/v5.4.6.zip")
     dest(File(zippedPath))
     doLast {
         unzipTo(File(sourcePath), dest)
         copy{
-            from("$sourcePath/lua-5.4.4")
+            from("$sourcePath/lua-5.4.6")
             into(sourceDestination)
         }
         delete(sourcePath)

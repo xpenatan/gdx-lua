@@ -1,1 +1,1 @@
-teestClass = import("lua.example.basic.model.TestClass", "test")
+teestClass = import("lua.example.basic.model.TestClass")

@@ -33,7 +33,7 @@ public class Main {
         String luaCorePath = luaPath + "/lua-gen";
         String luaTeavmPath = luaPath + "/lua-teavm";
 
-        String idlPath = luaBuildPath + "/src/main/cpp/lua.idl";
+        String idlPath = luaBuildPath + "/src/main/cpp/lua54.idl";
         IDLReader idlReader = IDLReader.readIDL(idlPath);
         String baseJavaDir = luaBasePath + "/src/main/java";
 

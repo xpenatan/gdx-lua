@@ -39,7 +39,6 @@ interface LuaState {
 
     void x_lua_newtable();
 
-    any x_lua_newuserdata(unsigned long size);
     any x_lua_newuserdatauv(unsigned long size, long nuvalue);
     long x_lua_next(long index);
 
@@ -52,7 +51,7 @@ interface LuaState {
     // Upvalue starts at index 2
     void x_lua_pushcclosure(LuaFunction callback, long n);
     void x_lua_pushcfunction(LuaFunction callback);
-    void x_lua_pushfstring([Const] DOMString fmt);
+    [Const, Value] IDLString x_lua_pushfstring([Const] DOMString fmt);
     void x_lua_pushglobaltable();
     void x_lua_pushinteger(long long n);
     void x_lua_pushlightuserdata(any n);
