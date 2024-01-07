@@ -3,8 +3,8 @@ package lua;
 import lua.idl.helper.IDLString;
 
 public class Lua {
-    LuaState luaState;
 
+    LuaState luaState;
     private ScriptStatus scriptStatus = new ScriptStatus();
 
     public Lua() {
@@ -23,6 +23,14 @@ public class Lua {
     public void registerGlobalFunction(String name, LuaFunction function) {
         luaState.lua_pushcfunction(function);
         luaState.lua_setglobal(name);
+    }
+
+    public void printTable(String table) {
+        printTable(table, luaState);
+    }
+
+    public void printStack() {
+        printStack(luaState);
     }
 
     public ScriptStatus runScript(String script) {
@@ -53,5 +61,28 @@ public class Lua {
         public String getError() {
             return error;
         }
+    }
+
+    public static void printTable(String table, LuaState luaState) {
+        luaState.lua_getglobal(table);
+        int i = luaState.lua_istable(-1);
+        if(i>0) {
+            System.out.println("### BEGIN TABLE ###");
+            IDLString idlString = luaState.dumpTable();
+            String s = idlString.c_str();
+            System.out.println(s);
+            System.out.println("### END TABLE ###");
+        }
+        else {
+            System.out.println(table + " is not a table");
+        }
+    }
+
+    public static void printStack(LuaState luaState) {
+        System.out.println("### BEGIN STACK ###");
+        IDLString idlString = luaState.dumpStack();
+        String s = idlString.c_str();
+        System.out.println(s);
+        System.out.println("### END STACK ###");
     }
 }

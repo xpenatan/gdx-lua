@@ -8,6 +8,7 @@ extern "C" {
 
 #include <cstdint>
 #include <string>
+#include <iostream>
 
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
@@ -39,9 +40,9 @@ static int lua_panic(lua_State* L);
 class LuaState {
 
 private:
-    lua_State * L;
 
 public:
+    lua_State * L;
 
     LuaState() {
         L = NULL;
@@ -55,7 +56,7 @@ public:
     int x_lua_compare(int index1, int index2, int op)          { return lua_compare(L, index1, index2, op); }
     void x_lua_concat(int op, int n)                           { lua_concat(L, n); }
     void x_lua_copy(int fromidx, int toidx)                    { lua_copy(L, fromidx, toidx); }
-    void x_lua_createtabble(int narr, int nrec)                { lua_createtable(L, narr, nrec); }
+    void x_lua_createtable(int narr, int nrec)                { lua_createtable(L, narr, nrec); }
     int x_lua_error()                                          { return lua_error(L); }
     int x_lua_getfield(int index, const char* k)               { return lua_getfield(L, index, k); }
 
@@ -217,32 +218,94 @@ public:
         lua_setglobal((lua_State*)L, (const char*)key);
     }
 
-    void stackDump() {
+    std::string dumpStack() {
+        std::string stackStr = "";
         int i;
         int top = lua_gettop(L); /* depth of the stack */
         for (i = 1; i <= top; i++) { /* repeat for each level */
             int t = lua_type(L, i);
-            switch (t) {
-            case LUA_TSTRING: { /* strings */
-                printf("'%s'", lua_tostring(L, i));
-                break;
+            int negI = (i - top) - 1;
+            std::string position = "[" + std::to_string(i) + "][" + std::to_string(negI) + "]:";
+
+            if (lua_isboolean(L, i)) {
+                std::string val = lua_toboolean(L, i) ? "true" : "false";
+                stackStr.append(position + val + "\n");
             }
-            case LUA_TBOOLEAN: { /* Booleans */
-                printf(lua_toboolean(L, i) ? "true" : "false");
-                break;
+            if (lua_isinteger(L, i)) {
+                std::string val = std::to_string(lua_tointeger(L, i));
+                stackStr.append(position + val + "\n");
             }
-            case LUA_TNUMBER: { /* numbers */
-                printf("%g", lua_tonumber(L, i));
-                break;
+            else if (lua_isnumber(L, i)) {
+                std::string val = std::to_string(lua_tonumber(L, i));
+                stackStr.append(position + val + "\n");
             }
-            default: { /* other values */
-                printf("%s", lua_typename(L, t));
-                break;
+            else if (lua_isstring(L, i)) {
+                std::string val = lua_tostring(L, i);
+                stackStr.append(position + val + "\n");
             }
+            else {
+                std::string val = lua_typename(L, t);
+                stackStr.append(position + val + "\n");
             }
-            printf(" "); /* put a separator */
         }
-        printf("\n"); /* end the listing */
+        return stackStr;
+    }
+
+    std::string dumpTable(int indent = 0)
+    {
+        std::string tableStr = "";
+        std::string space = "-";
+        for(int i = 0; i < indent; i++) {
+            space += "--";
+        }
+
+        lua_pushnil(L);
+        while (lua_next(L, -2) != 0) {
+            int keyType = lua_type(L, -2);
+            int valueType = lua_type(L, -1);
+            std::string keyTypeStr = lua_typename(L, keyType);
+            std::string valueTypeStr = lua_typename(L, valueType);
+            std::string keyStr = "";
+            std::string valueStr = "";
+            std::string keyValueType = "[" + keyTypeStr + " = " + valueTypeStr + "]";
+
+            if (lua_isinteger(L, -2)) {
+                lua_Integer number = lua_tointeger(L, -2);
+                keyStr = std::to_string(number);
+            } 
+            else if(lua_isnumber(L, -2)) {
+                lua_Number number = lua_tonumber(L, -2);
+                keyStr = std::to_string(number);
+            }            
+            else if(lua_isstring(L, -2)) {
+                keyStr = lua_tostring(L, -2);
+            }
+            else {
+                keyStr = keyTypeStr;
+            }
+
+            if (lua_isnumber(L, -1)) {
+                valueStr = lua_tostring(L, -1);
+                valueStr += " " + keyValueType;
+            }
+            else if (lua_isstring(L, -1)) {
+                std::string val = lua_tostring(L, -1);
+                valueStr += "'" + val + "'";
+                valueStr += " " + keyValueType;
+            }
+            else {
+                valueStr = keyValueType;
+            }
+            
+            tableStr.append(space + " " + keyStr + " = " + valueStr + "\n");
+
+            if (lua_istable(L, -1)) {
+                indent++;
+                tableStr += dumpTable(indent);
+            }
+            lua_pop(L, 1);
+        }
+        return tableStr;
     }
 
     static void setIntToVoid(void * pointer, int value) {
@@ -257,7 +320,8 @@ public:
 };
 
 static int lua_panic(lua_State* L) {
-    printf("PANIC ERROR");
+    const char* text = lua_tostring(L, -1);
+    std::cout << "PANIC ERROR: " << text << std::endl;
     return 1;
 }
 
@@ -296,3 +360,12 @@ static int lua_function2(lua_State* L) {
     validate(L, lua);
     return retValue;
 }
+
+//int luaopen_array(lua_State* L) {
+//    luaL_newmetatable(L, "LuaBook.array"); /* create metatable */
+//    lua_pushvalue(L, -1); /* duplicate the metatable */
+//    lua_setfield(L, -2, "__index"); /* mt.__index = mt */
+//    luaL_setfuncs(L, arraylib_m, 0); /* register metamethods */
+//    luaL_newlib(L, arraylib_f); /* create lib table */
+//    return 1;
+//}

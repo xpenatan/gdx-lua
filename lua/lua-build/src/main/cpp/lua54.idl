@@ -10,7 +10,7 @@ interface LuaState {
     long x_lua_compare(long index1, long index2, long op);
     void x_lua_concat(long op, long n);
     void x_lua_copy(long fromidx, long toidx);
-    void x_lua_createtabble(long narr, long nrec);
+    void x_lua_createtable(long narr, long nrec);
 //    long x_lua_error();
     long x_lua_getfield(long index, [Const] DOMString k);
 
@@ -133,7 +133,8 @@ interface LuaState {
     void createContext();
     void destroyContext();
 
-    void stackDump();
+    [Const, Value] IDLString dumpStack();
+    [Const, Value] IDLString dumpTable();
 
     static void setIntToVoid(any pointer, long value);
     static long getIntFromVoid(any pointer);
