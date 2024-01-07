@@ -30,7 +30,11 @@ public class Lua {
     }
 
     public void printStack() {
-        printStack(luaState);
+        System.out.println(dumpStack(luaState));
+    }
+
+    public String dumpStack() {
+        return dumpStack(luaState);
     }
 
     public ScriptStatus runScript(String script) {
@@ -67,22 +71,20 @@ public class Lua {
         luaState.lua_getglobal(table);
         int i = luaState.lua_istable(-1);
         if(i>0) {
-            System.out.println("### BEGIN TABLE ###");
+            System.err.println("### BEGIN TABLE ###");
             IDLString idlString = luaState.dumpTable();
             String s = idlString.c_str();
-            System.out.println(s);
-            System.out.println("### END TABLE ###");
+            System.err.print(s);
+            System.err.println("### END TABLE ###");
         }
         else {
             System.out.println(table + " is not a table");
         }
     }
 
-    public static void printStack(LuaState luaState) {
-        System.out.println("### BEGIN STACK ###");
+    public static String dumpStack(LuaState luaState) {
         IDLString idlString = luaState.dumpStack();
         String s = idlString.c_str();
-        System.out.println(s);
-        System.out.println("### END STACK ###");
+        return "### BEGIN STACK ###\n" + s + "### END STACK ###";
     }
 }

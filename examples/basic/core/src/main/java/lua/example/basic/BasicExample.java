@@ -10,6 +10,7 @@ import imgui.extension.textedit.TextEditor;
 import imgui.idl.helper.IDLString;
 import lua.Lua;
 import lua.LuaFunction;
+import lua.LuaLibrary;
 import lua.LuaState;
 import lua.LuaTypes;
 import lua.example.basic.imgui.ImGuiRenderer;
@@ -37,51 +38,68 @@ public class BasicExample extends ImGuiRenderer {
 
         LuaState luaState = lua.getLuaState();
 
-//        luaState.lua_newtable();
-//        {
-//            luaState.lua_pushstring("lib");
-//            luaState.lua_newtable();
-//            {
-//                luaState.lua_pushstring("test");
-//                luaState.lua_newtable();
-//                {
-//                    int index = luaState.lua_gettop();
-//                    luaState.lua_pushstring("import");
-//                    luaState.lua_pushcfunction(new LuaFunction() {
-//                        @Override
-//                        public int onCall(LuaState luaState) {
-//                            int params = luaState.lua_gettop();
-//                            boolean argError = false;
-//
-//                            if(params != 1) {
-//                                argError = true;
-//                            }
-//                            else {
-//                                int argType = luaState.lua_type(1);
-//                                if(argType != LuaTypes.LUA_TSTRING) {
-//                                    argError = true;
-//                                }
-//                            }
-//                            if(argError) {
-//                                luaState.luaL_error("Only accept a single String argument");
-//                                return 0;
-//                            }
-//
-//                            return 1;
-//                        }
-//                    });
-//                    luaState.lua_settable(-3);
-//                }
-//                luaState.lua_settable(-3);
-//            }
-//            luaState.lua_settable(-3);
-//        }
-//        luaState.lua_setglobal("java");
+        LuaFunction function = new LuaFunction() {
+            @Override
+            public int onCall(LuaState luaState) {
+                int params = luaState.lua_gettop();
+                boolean argError = false;
 
+                if(params != 1) {
+                    argError = true;
+                }
+                else {
+                    int argType = luaState.lua_type(1);
+                    if(argType != LuaTypes.LUA_TSTRING) {
+                        argError = true;
+                    }
+                }
+                if(argError) {
+                    luaState.luaL_error("Only accept a single String argument");
+                    return 0;
+                }
+
+                System.out.println("import");
+
+                return 1;
+            }
+        };
+
+//        LuaLibrary.addLibrary(lua, "java.lib.import", function, false);
+
+        LuaFunction functionIn = new LuaFunction() {
+            @Override
+            public int onCall(LuaState luaState) {
+                int params = luaState.lua_gettop();
+                boolean argError = false;
+
+                if(params != 1) {
+                    argError = true;
+                }
+                else {
+                    int argType = luaState.lua_type(1);
+                    if(argType != LuaTypes.LUA_TSTRING) {
+                        argError = true;
+                    }
+                }
+                if(argError) {
+                    luaState.luaL_error("Only accept a single String argument");
+                    return 0;
+                }
+
+                System.out.println("include");
+
+                return 1;
+            }
+        };
+
+//        LuaLibrary.addLibrary(lua, "java.lib.include", functionIn, true);
+
+        LuaLibrary.test(lua);
+
+        lua.printTable("java");
 
         Lua.ScriptStatus scriptStatus = lua.runScript(code);
 
-        lua.printTable("java2");
 
         if(!scriptStatus.isValid()) {
             String error = scriptStatus.getError();
