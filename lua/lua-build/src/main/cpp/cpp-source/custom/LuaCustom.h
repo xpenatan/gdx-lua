@@ -130,7 +130,7 @@ public:
     void x_lua_remove(int index)                               { lua_remove(L, index); }
     void x_lua_replace(int index)                              { lua_replace(L, index); }
     int x_lua_resetthread(int index)                           { return lua_resetthread(L); }
-    void x_lua_rotatee(int index, int n)                       { lua_rotate(L, index, n); }
+    void x_lua_rotate(int index, int n)                       { lua_rotate(L, index, n); }
 
     void x_lua_setfield(int index, const char* k)              { lua_setfield(L, index, k); }
     void x_lua_setglobal(const char* name)                     { lua_setglobal(L, name); }
@@ -244,8 +244,10 @@ public:
                 stackStr.append(position + val + "\n");
             }
             else {
+                const void* pointer = lua_topointer(L, i);
+                auto addr = reinterpret_cast<std::uintptr_t>(pointer);
                 std::string val = lua_typename(L, t);
-                stackStr.append(position + val + "\n");
+                stackStr.append(position + val + " Addr: " + std::to_string(addr) + "\n");
             }
         }
         return stackStr;
@@ -253,6 +255,10 @@ public:
 
     std::string dumpTable(int indent = 0)
     {
+        if (lua_istable(L, -1) == 0) {
+            return "";
+        }
+
         std::string tableStr = "";
         std::string space = "-";
         for(int i = 0; i < indent; i++) {

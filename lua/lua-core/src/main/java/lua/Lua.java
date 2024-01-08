@@ -25,12 +25,9 @@ public class Lua {
         luaState.lua_setglobal(name);
     }
 
-    public void printTable(String table) {
-        printTable(table, luaState);
-    }
-
-    public void printStack() {
-        System.out.println(dumpStack(luaState));
+    public String dumpTable(String table) {
+        luaState.lua_getglobal(table);
+        return dumpTable(table, luaState);
     }
 
     public String dumpStack() {
@@ -67,19 +64,23 @@ public class Lua {
         }
     }
 
-    public static void printTable(String table, LuaState luaState) {
-        luaState.lua_getglobal(table);
-        int i = luaState.lua_istable(-1);
-        if(i>0) {
-            System.err.println("### BEGIN TABLE ###");
+    /**
+     * Return the table log on top of the stack
+     */
+    public static String dumpTable(String table, LuaState luaState) {
+        String dumpTable = "";
+        boolean containsTable = luaState.lua_istable(-1) != 0;
+        if(containsTable) {
             IDLString idlString = luaState.dumpTable();
             String s = idlString.c_str();
-            System.err.print(s);
-            System.err.println("### END TABLE ###");
+            dumpTable += "### BEGIN TABLE ###\nTable: " + table + "\n"+ s + "### END TABLE ###";
         }
         else {
-            System.out.println(table + " is not a table");
+            dumpTable = table + " is not a table";
         }
+        luaState.lua_pop(1);
+
+        return dumpTable;
     }
 
     public static String dumpStack(LuaState luaState) {

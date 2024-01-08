@@ -1,2 +1,10 @@
-java.lib.import("test")
-java.lib.include("test")
+java.import("test")
+java.include("test")
+
+-- java = {
+--     lib = {
+--         import = function()
+--
+--         end
+--     }
+-- }

@@ -63,8 +63,7 @@ public class BasicExample extends ImGuiRenderer {
                 return 1;
             }
         };
-
-//        LuaLibrary.addLibrary(lua, "java.lib.import", function, false);
+        LuaLibrary.addLibrary(lua, "java.import", function);
 
         LuaFunction functionIn = new LuaFunction() {
             @Override
@@ -91,15 +90,12 @@ public class BasicExample extends ImGuiRenderer {
                 return 1;
             }
         };
-
-//        LuaLibrary.addLibrary(lua, "java.lib.include", functionIn, true);
-
-        LuaLibrary.test(lua);
-
-        lua.printTable("java");
+        LuaLibrary.addLibrary(lua, "java.include", functionIn);
 
         Lua.ScriptStatus scriptStatus = lua.runScript(code);
 
+        String table = lua.dumpTable("java");
+        System.out.println(table);
 
         if(!scriptStatus.isValid()) {
             String error = scriptStatus.getError();
