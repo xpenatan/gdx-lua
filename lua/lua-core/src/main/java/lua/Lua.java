@@ -5,7 +5,6 @@ import lua.idl.helper.IDLString;
 public class Lua {
 
     LuaState luaState;
-    private ScriptStatus scriptStatus = new ScriptStatus();
 
     public Lua() {
         luaState = new LuaState();
@@ -34,34 +33,30 @@ public class Lua {
         return dumpStack(luaState);
     }
 
-    public ScriptStatus runScript(String script) {
+    public ErrorStatus buildScript(String script) {
+        ErrorStatus status = ErrorStatus.get();
         luaState.luaL_loadstring(script);
-        scriptStatus.code = luaState.lua_pcall(0, 0, 0);
-        scriptStatus.error = "";
-        if(!scriptStatus.isValid()) {
+        status.code = luaState.lua_pcall(0, 0, 0);
+        status.error = "";
+        if(!status.isValid()) {
             IDLString idlString = luaState.lua_tostring(-1);
-            scriptStatus.error = idlString.c_str();
+            status.error = idlString.c_str();
         }
-        return scriptStatus;
+        return status;
     }
 
-    public static class ScriptStatus {
-        private ScriptStatus() {}
-
-        int code;
-        String error;
-
-        public boolean isValid() {
-            return code == 0;
+    /**
+     * Call function
+     */
+    public ErrorStatus callFunction(int nargs, int nresults, int msgh) {
+        ErrorStatus status = ErrorStatus.get();
+        status.code = luaState.lua_pcall(nargs, nresults, msgh);
+        status.error = "";
+        if(!status.isValid()) {
+            IDLString idlString = luaState.lua_tostring(-1);
+            status.error = idlString.c_str();
         }
-
-        public int getCode() {
-            return code;
-        }
-
-        public String getError() {
-            return error;
-        }
+        return status;
     }
 
     /**

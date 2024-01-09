@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setWindowedMode(1444, 800);
-        config.setTitle("ImGui Basic Example");
+        config.setTitle("Lua Basic Example");
         config.useVsync(true);
         new Lwjgl3Application(new LuaGame(), config);
     }

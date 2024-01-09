@@ -8,6 +8,7 @@ sourceSets["main"].java {
 
 dependencies {
     implementation("com.github.xpenatan.jParser:loader-core:${LibExt.jParserVersion}")
+    implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
 }
 
 java {
