@@ -1,8 +1,13 @@
-java.import("test")
-java.include("test")
+ShapeRenderer = java.import("com.badlogic.gdx.graphics.glutils")
 
-function onRender()
+shapeRenderer = ShapeRenderer.new()
+
+function render()
     Gdx.gl.glClearColor(1.0, 1.0, 1.0, 1.0)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
+    shapeRenderer:begin(ShapeRenderer.ShapeType.Filled)
+    shapeRenderer:setColor(1, 0, 0 ,1)
+    shapeRenderer:rect(2, 20, 100, 100)
+    shapeRenderer:end()
 end

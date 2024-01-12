@@ -1,8 +1,8 @@
 package lua.example.basic;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import imgui.ImGui;
 import imgui.ImGuiCond;
 import imgui.ImVec2;
@@ -10,22 +10,20 @@ import imgui.extension.textedit.Coordinates;
 import imgui.extension.textedit.LanguageDefinition;
 import imgui.extension.textedit.TextEditor;
 import imgui.idl.helper.IDLString;
-import lua.DefaultImportFunction;
 import lua.ErrorStatus;
 import lua.Lua;
-import lua.LuaFunction;
-import lua.LuaLibrary;
 import lua.LuaState;
 import lua.example.basic.imgui.ImGuiRenderer;
-import lua.gdx.register.GL;
+import lua.register.gdx.GdxRegister;
 
 public class BasicExample extends ImGuiRenderer {
 
     private TextEditor editor;
-    private OrthographicCamera uiCam;
     private SpriteBatch batch;
     public Lua lua;
     boolean luaError;
+
+    ShapeRenderer renderer = new ShapeRenderer();
 
     @Override
     public void show() {
@@ -43,27 +41,9 @@ public class BasicExample extends ImGuiRenderer {
 
         LuaState luaState = lua.getLuaState();
 
-        LuaFunction function = new DefaultImportFunction() {
-            @Override
-            public int onLibrary(LuaState luaState) {
-                System.out.println("import");
-                return 1;
-            }
-        };
-        LuaLibrary.addLibrary(lua, "java.import", function);
+        GdxRegister gdxClasses = new GdxRegister();
 
-        LuaFunction functionIn = new DefaultImportFunction() {
-            @Override
-            public int onLibrary(LuaState luaState) {
-                System.out.println("include");
-                return 1;
-            }
-        };
-        LuaLibrary.addLibrary(lua, "java.include", functionIn);
-        GL.registerGL(lua);
-
-
-
+        gdxClasses.register(lua);
 
         buildScript(code);
     }
@@ -72,6 +52,11 @@ public class BasicExample extends ImGuiRenderer {
     public void renderImGui() {
         update();
         renderEditText();
+
+        renderer.begin(ShapeRenderer.ShapeType.Filled);
+        renderer.setColor(1, 0, 0 ,1);
+        renderer.rect(2, 20, 100, 100);
+        renderer.end();
     }
 
     public void update() {

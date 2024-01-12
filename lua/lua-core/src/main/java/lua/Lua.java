@@ -6,9 +6,14 @@ public class Lua {
 
     LuaState luaState;
 
+    LuaImport luaImport;
+
     public Lua() {
         luaState = new LuaState();
         luaState.createContext();
+
+        luaImport = new LuaImport();
+        luaImport.register(this);
     }
 
     public void dispose() {
@@ -57,6 +62,10 @@ public class Lua {
             status.error = idlString.c_str();
         }
         return status;
+    }
+
+    public LuaImport getLuaImport() {
+        return luaImport;
     }
 
     /**

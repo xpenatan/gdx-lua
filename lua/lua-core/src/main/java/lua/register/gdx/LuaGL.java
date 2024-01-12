@@ -1,4 +1,4 @@
-package lua.gdx.register;
+package lua.register.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -7,7 +7,7 @@ import lua.LuaFunction;
 import lua.LuaLibrary;
 import lua.LuaState;
 
-public class GL {
+public class LuaGL {
 
     public static void registerGL(Lua lua) {
         LuaState luaState = lua.getLuaState();

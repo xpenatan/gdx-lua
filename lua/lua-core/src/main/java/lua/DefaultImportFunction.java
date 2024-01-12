@@ -1,12 +1,14 @@
 package lua;
 
+import lua.register.ImportListener;
+
 /**
  * Function that can only contains 1 string parameter.
  */
-public abstract class DefaultImportFunction extends LuaFunction {
+public abstract class DefaultImportFunction extends LuaFunction implements ImportListener {
 
     @Override
-    public int onCall(LuaState luaState) {
+    final public int onCall(LuaState luaState) {
         int params = luaState.lua_gettop();
         boolean argError = false;
         if(params != 1) {
@@ -22,8 +24,6 @@ public abstract class DefaultImportFunction extends LuaFunction {
             luaState.luaL_error("Only accept a single String argument");
             return 0;
         }
-        return onLibrary(luaState);
+        return onImport(luaState);
     }
-
-    protected abstract int onLibrary(LuaState luaState);
 }
