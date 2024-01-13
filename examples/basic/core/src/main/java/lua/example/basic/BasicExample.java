@@ -14,7 +14,7 @@ import lua.ErrorStatus;
 import lua.Lua;
 import lua.LuaState;
 import lua.example.basic.imgui.ImGuiRenderer;
-import lua.register.gdx.GdxRegister;
+import lua.register.gdx.LuaGdx;
 
 public class BasicExample extends ImGuiRenderer {
 
@@ -41,9 +41,9 @@ public class BasicExample extends ImGuiRenderer {
 
         LuaState luaState = lua.getLuaState();
 
-        GdxRegister gdxClasses = new GdxRegister();
+        LuaGdx luaGdx = new LuaGdx();
 
-        gdxClasses.register(lua);
+        luaGdx.register(lua);
 
         buildScript(code);
     }

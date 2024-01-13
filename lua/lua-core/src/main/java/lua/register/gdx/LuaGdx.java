@@ -3,11 +3,11 @@ package lua.register.gdx;
 import lua.Lua;
 import lua.register.gdx.graphics.glutils.LuaShapeRenderer;
 
-public class GdxRegister {
+public class LuaGdx {
 
     LuaShapeRenderer luaShapeRenderer;
 
-    public GdxRegister() {
+    public LuaGdx() {
         luaShapeRenderer = new LuaShapeRenderer();
     }
 
