@@ -2,10 +2,9 @@ ShapeRenderer = java.import("com.badlogic.gdx.graphics.glutils.ShapeRenderer")
 
 renderer = ShapeRenderer.new()
 
-renderer.x = 10
+renderer.begin()
 
-print(renderer.x)
-renderer:begin(50)
+-- renderer:begin(50)
 
 -- function render()
 --     Gdx.gl.glClearColor(1.0, 1.0, 1.0, 1.0)

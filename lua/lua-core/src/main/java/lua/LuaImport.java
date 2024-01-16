@@ -1,11 +1,6 @@
 package lua;
 
 import java.util.HashMap;
-import lua.DefaultImportFunction;
-import lua.Lua;
-import lua.LuaFunction;
-import lua.LuaLibrary;
-import lua.LuaState;
 import lua.register.ImportListener;
 
 public class LuaImport {

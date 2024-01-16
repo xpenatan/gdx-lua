@@ -11,7 +11,7 @@ public class LuaGL {
 
     public static void registerGL(Lua lua) {
         LuaState luaState = lua.getLuaState();
-        LuaLibrary.getOrCreateTable(lua, "GL20");
+        LuaLibrary.getOrCreateClass(lua, GL20.class);
 
         luaState.lua_pushstring("GL_COLOR_BUFFER_BIT");
         luaState.lua_pushinteger(GL20.GL_COLOR_BUFFER_BIT);

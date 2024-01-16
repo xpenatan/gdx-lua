@@ -1,7 +1,6 @@
 package lua;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.badlogic.gdx.utils.IntMap;
 import lua.idl.helper.IDLString;
 
 public class Lua {
@@ -10,9 +9,12 @@ public class Lua {
 
     LuaImport luaImport;
 
+    public IntMap<Object> luaJavaInstances;
+
     public Lua() {
         luaState = new LuaState();
         luaState.createContext();
+        luaJavaInstances = new IntMap<>();
 
         luaImport = new LuaImport();
         luaImport.register(this);
@@ -29,6 +31,18 @@ public class Lua {
     public void registerGlobalFunction(String name, LuaFunction function) {
         luaState.lua_pushcfunction(function);
         luaState.lua_setglobal(name);
+    }
+
+    /**
+     *  Register function to table on top of the stack
+     */
+    public boolean registerFunction(String name, LuaFunction function) {
+        if(luaState.lua_istable(-1) != 0) {
+            luaState.lua_pushcfunction(function);
+            luaState.lua_setfield(-2, name);
+            return true;
+        }
+        return false;
     }
 
     public String dumpTable() {
@@ -72,6 +86,15 @@ public class Lua {
 
     public LuaImport getLuaImport() {
         return luaImport;
+    }
+
+    void addObjectInstance(int key, Object object) {
+        luaJavaInstances.put(object.hashCode(), object);
+    }
+
+    boolean removeObjectInstance(int hash) {
+        Object remove = luaJavaInstances.remove(hash);
+        return remove != null;
     }
 
     /**

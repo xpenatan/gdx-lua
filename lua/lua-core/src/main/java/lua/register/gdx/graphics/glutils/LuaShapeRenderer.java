@@ -5,8 +5,10 @@ import java.util.HashMap;
 import lua.Lua;
 import lua.LuaFunction;
 import lua.LuaImport;
+import lua.LuaLibrary;
 import lua.LuaState;
 import lua.register.ImportListener;
+import lua.register.LuaCreateClass;
 
 public class LuaShapeRenderer {
 
@@ -23,18 +25,34 @@ public class LuaShapeRenderer {
         LuaImport luaImport = lua.getLuaImport();
         LuaState luaState = lua.getLuaState();
 
-        createTableTemplate(lua, luaState);
-
-        luaImport.addImportListener(METATABLE, new ImportListener() {
+        LuaLibrary.registerClass(lua, ShapeRenderer.class, new LuaCreateClass() {
             @Override
-            public int onImport(LuaState luaState) {
-                // Return a table template to create our shape renderer
-
-                luaState.luaL_getmetatable(METATABLE);
-
-                return 1;
+            public Object onCreateClass(LuaState luaState) {
+                return new ShapeRenderer();
             }
         });
+
+        LuaLibrary.registerClassFunction(lua, ShapeRenderer.class, "begin", new LuaFunction() {
+            @Override
+            public int onCall(LuaState luaState) {
+                System.out.println("BEGIN CALLED");
+                return 0;
+            }
+        });
+
+
+//        createTableTemplate(lua, luaState);
+//
+//        luaImport.addImportListener(METATABLE, new ImportListener() {
+//            @Override
+//            public int onImport(LuaState luaState) {
+//                // Return a table template to create our shape renderer
+//
+//                luaState.luaL_getmetatable(METATABLE);
+//
+//                return 1;
+//            }
+//        });
     }
 
     private void createTableTemplate(Lua lua, LuaState luaState) {
