@@ -5,7 +5,7 @@ import lua.register.ImportListener;
 
 public class LuaImport {
 
-    private HashMap<String, ImportListener> importMap;
+    private final HashMap<String, ImportListener> importMap;
 
     public LuaImport() {
         importMap = new HashMap<>();

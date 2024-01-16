@@ -74,7 +74,8 @@ public class LuaLibrary {
     }
 
     /**
-     * Get and push meta table to top of stack. Return false if it doesn't exist.
+     * Get and push meta table to top of stack. Return false if it doesn't exist. <br>
+     * It's your responsibility to pop the table from stack.
      */
     public static boolean getMetaTable(Lua lua, String metaTable) {
         LuaState luaState = lua.luaState;
@@ -87,7 +88,8 @@ public class LuaLibrary {
     }
 
     /**
-     * Get and push class template to top of stack. Return false if it doesn't exist.
+     * Get and push class template to top of stack. Return false if it doesn't exist. <br>
+     * It's your responsibility to pop the table from stack.
      */
     public static boolean getClassTemplate(Lua lua, String metaTable) {
         if(getMetaTable(lua, metaTable)) {
@@ -99,6 +101,24 @@ public class LuaLibrary {
         return false;
     }
 
+    /**
+     * Register class function. Class registration should exist.
+     */
+    public static boolean registerClassFunction(Lua lua, Class<?> clazz, String functionName, LuaFunction function) {
+        LuaState luaState = lua.luaState;
+        String name = clazz.getName();
+        if(getClassTemplate(lua, name)) {
+            if(lua.registerFunction(functionName, function)) {
+                luaState.lua_pop(-1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Register Class. Use lua code 'MYCLASS = java.import("class full path")' to obtain lua class object.
+     */
     public static void registerClass(Lua lua, Class<?> clazz, LuaCreateClass listener) {
         String metaTable = clazz.getName();
         LuaImport luaImport = lua.getLuaImport();
@@ -115,16 +135,6 @@ public class LuaLibrary {
                 return 1;
             }
         });
-    }
-
-    public static void registerClassFunction(Lua lua, Class<?> clazz, String functionName, LuaFunction function) {
-        LuaState luaState = lua.luaState;
-        String name = clazz.getName();
-        if(getClassTemplate(lua, name)) {
-            if(lua.registerFunction(functionName, function)) {
-                luaState.lua_pop(-1);
-            }
-        }
     }
 
     private static void createMetaTableAndTemplate(Lua lua, String metaTable, LuaCreateClass listener) {
