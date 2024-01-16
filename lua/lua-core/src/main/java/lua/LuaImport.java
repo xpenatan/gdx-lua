@@ -31,6 +31,7 @@ public class LuaImport {
                 String importParam = luaState.lua_tostring(-1).c_str();
                 ImportListener importListener = importMap.get(importParam);
                 if(importListener != null) {
+                    luaState.lua_pop(-1);
                     return importListener.onImport(luaState);
                 }
                 else {

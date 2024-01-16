@@ -94,7 +94,7 @@ interface LuaState {
 //    [Const, Value] IDLString x_lua_tolstring(long index, size_t* len);
     double x_lua_tonumber(long index);
 //    lua_Number lua_tonumberx (lua_State *L, int index, int *isnum);
-//    const void *lua_topointer (lua_State *L, int index);
+    [Const] any x_lua_topointer (long index);
     [Const, Value] IDLString x_lua_tostring(long index);
 //    lua_State *lua_tothread (lua_State *L, int index);
     any x_lua_touserdata(long index);

@@ -1,5 +1,7 @@
 package lua;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lua.idl.helper.IDLString;
 
 public class Lua {
@@ -27,6 +29,10 @@ public class Lua {
     public void registerGlobalFunction(String name, LuaFunction function) {
         luaState.lua_pushcfunction(function);
         luaState.lua_setglobal(name);
+    }
+
+    public String dumpTable() {
+        return dumpTable("", luaState);
     }
 
     public String dumpTable(String table) {
@@ -73,16 +79,20 @@ public class Lua {
      */
     public static String dumpTable(String table, LuaState luaState) {
         String dumpTable = "";
+        int top = luaState.lua_gettop();
         boolean containsTable = luaState.lua_istable(-1) != 0;
         if(containsTable) {
             IDLString idlString = luaState.dumpTable();
             String s = idlString.c_str();
-            dumpTable += "### BEGIN TABLE ###\nTable: " + table + "\n"+ s + "### END TABLE ###";
+            long addr = luaState.lua_topointer(-1);
+            dumpTable += "### BEGIN TABLE ###\nTable: " + table + " - Addr: " + addr + "\n"+ s + "### END TABLE ###";
         }
         else {
             dumpTable = table + " is not a table";
         }
-        luaState.lua_pop(1);
+        if(top > 0) {
+            luaState.lua_pop(1);
+        }
 
         return dumpTable;
     }

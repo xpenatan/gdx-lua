@@ -8,6 +8,7 @@ extern "C" {
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include <iostream>
 
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
@@ -152,6 +153,7 @@ public:
     const std::string x_lua_tolstring(int index, size_t* len)  { return lua_tolstring(L, index, len); }
     lua_Number x_lua_tonumber(int index)                       { return lua_tonumber(L, index); }
 
+    const void* x_lua_topointer(int index)                     { return lua_topointer(L, index); }
     const std::string x_lua_tostring(int index)                { return lua_tostring(L, index); }
 
     void* x_lua_touserdata(int index)                          { return lua_touserdata(L, index); }
@@ -253,11 +255,14 @@ public:
         return stackStr;
     }
 
-    std::string dumpTable(int indent = 0)
+    std::string dumpTable(std::vector<std::string> vector = std::vector<std::string>(), int indent = 0)
     {
         if (lua_istable(L, -1) == 0) {
             return "";
         }
+
+        auto addr = reinterpret_cast<std::uintptr_t>(lua_topointer(L, -1));
+        vector.push_back(std::to_string(addr));
 
         std::string tableStr = "";
         std::string space = "-";
@@ -271,6 +276,8 @@ public:
             int valueType = lua_type(L, -1);
             std::string keyTypeStr = lua_typename(L, keyType);
             std::string valueTypeStr = lua_typename(L, valueType);
+            auto addr = reinterpret_cast<std::uintptr_t>(lua_topointer(L, -1));
+            std::string valueAddr = std::to_string(addr);
             std::string keyStr = "";
             std::string valueStr = "";
             std::string keyValueType = "[" + keyTypeStr + " = " + valueTypeStr + "]";
@@ -300,14 +307,28 @@ public:
                 valueStr += " " + keyValueType;
             }
             else {
-                valueStr = keyValueType;
+                vector.push_back(valueAddr);
+                valueStr = keyValueType + " - Addr: " + valueAddr;
             }
             
             tableStr.append(space + " " + keyStr + " = " + valueStr + "\n");
 
             if (lua_istable(L, -1)) {
                 indent++;
-                tableStr += dumpTable(indent);
+
+                int count = 0;
+                for (int i = 0; i < vector.size(); i++) {
+                    std::string value = vector[i];
+                    if (value == valueAddr) {
+                        count++;
+                    }
+                }
+
+                std::string stack = dumpStack();
+
+                if (count < 2) {
+                    tableStr += dumpTable(vector, indent);
+                }
             }
             lua_pop(L, 1);
         }

@@ -98,6 +98,9 @@ public class BasicExample extends ImGuiRenderer {
 
     public void buildScript(String scriptCode) {
         ErrorStatus status = lua.buildScript(scriptCode);
+        long pointer = lua.getLuaState().lua_topointer(-1);
+//        String s = lua.dumpTable("ShapeRenderer");
+        String s = lua.dumpTable("Vector2");
         luaError = false;
         if(!status.isValid()) {
             String errorText = status.getError();
