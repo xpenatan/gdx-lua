@@ -1,18 +1,13 @@
 package lua.register.gdx;
 
 import lua.Lua;
+import lua.register.gdx.graphics.LuaGL20;
 import lua.register.gdx.graphics.glutils.LuaShapeRenderer;
 
 public class LuaGdx {
 
-    LuaShapeRenderer luaShapeRenderer;
-
-    public LuaGdx() {
-        luaShapeRenderer = new LuaShapeRenderer();
-    }
-
-    public void register(Lua lua) {
-        LuaGL.registerGL(lua);
-        luaShapeRenderer.register(lua);
+    public static void register(Lua lua) {
+        LuaGL20.registerGL(lua);
+        LuaShapeRenderer.register(lua);
     }
 }

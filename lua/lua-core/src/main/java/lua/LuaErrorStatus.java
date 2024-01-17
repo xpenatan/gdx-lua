@@ -1,10 +1,10 @@
 package lua;
 
-public class ErrorStatus {
-    private ErrorStatus() {}
+public class LuaErrorStatus {
+    private LuaErrorStatus() {}
 
-    static ErrorStatus errorStatus = new ErrorStatus();
-    public static ErrorStatus get() { errorStatus.reset(); return errorStatus; }
+    static LuaErrorStatus errorStatus = new LuaErrorStatus();
+    public static LuaErrorStatus get() { errorStatus.reset(); return errorStatus; }
 
     int code;
     String error;

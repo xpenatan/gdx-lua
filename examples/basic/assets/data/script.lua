@@ -2,7 +2,11 @@ ShapeRenderer = java.import("com.badlogic.gdx.graphics.glutils.ShapeRenderer")
 
 renderer = ShapeRenderer.new()
 
-renderer.begin()
+renderer:begin()
+
+print(ShapeRenderer)
+print(renderer)
+
 
 -- renderer:begin(50)
 

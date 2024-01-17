@@ -314,8 +314,6 @@ public:
             tableStr.append(space + " " + keyStr + " = " + valueStr + "\n");
 
             if (lua_istable(L, -1)) {
-                indent++;
-
                 int count = 0;
                 for (int i = 0; i < vector.size(); i++) {
                     std::string value = vector[i];
@@ -327,7 +325,7 @@ public:
                 std::string stack = dumpStack();
 
                 if (count < 2) {
-                    tableStr += dumpTable(vector, indent);
+                    tableStr += dumpTable(vector, indent + 1);
                 }
             }
             lua_pop(L, 1);

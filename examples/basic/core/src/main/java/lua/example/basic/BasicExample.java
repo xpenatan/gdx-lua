@@ -10,7 +10,7 @@ import imgui.extension.textedit.Coordinates;
 import imgui.extension.textedit.LanguageDefinition;
 import imgui.extension.textedit.TextEditor;
 import imgui.idl.helper.IDLString;
-import lua.ErrorStatus;
+import lua.LuaErrorStatus;
 import lua.Lua;
 import lua.LuaState;
 import lua.example.basic.imgui.ImGuiRenderer;
@@ -70,7 +70,7 @@ public class BasicExample extends ImGuiRenderer {
                 luaError = true;
             }
             else {
-                ErrorStatus status = lua.callFunction(0, 0, 0);
+                LuaErrorStatus status = lua.callFunction(0, 0, 0);
                 if(!status.isValid()) {
                     String errorText = status.getError();
                     System.err.println(errorText);
@@ -97,10 +97,11 @@ public class BasicExample extends ImGuiRenderer {
     }
 
     public void buildScript(String scriptCode) {
-        ErrorStatus status = lua.buildScript(scriptCode);
+        LuaErrorStatus status = lua.buildScript(scriptCode);
         long pointer = lua.getLuaState().lua_topointer(-1);
 //        String s = lua.dumpTable("ShapeRenderer");
-//        String s = lua.dumpTable("Vector2");
+        String ShapeRenderer = lua.dumpTable("ShapeRenderer");
+        String renderer = lua.dumpTable("renderer");
         luaError = false;
         if(!status.isValid()) {
             String errorText = status.getError();

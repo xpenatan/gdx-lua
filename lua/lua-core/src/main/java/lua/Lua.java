@@ -1,23 +1,26 @@
 package lua;
 
 import com.badlogic.gdx.utils.IntMap;
+import java.util.HashMap;
 import lua.idl.helper.IDLString;
+import lua.register.DefaultImportFunction;
+import lua.register.ImportListener;
 
 public class Lua {
 
     LuaState luaState;
 
-    LuaImport luaImport;
+    private final HashMap<String, ImportListener> importMap;
 
     public IntMap<Object> luaJavaInstances;
 
     public Lua() {
+        importMap = new HashMap<>();
         luaState = new LuaState();
         luaState.createContext();
         luaJavaInstances = new IntMap<>();
 
-        luaImport = new LuaImport();
-        luaImport.register(this);
+        register(this);
     }
 
     public void dispose() {
@@ -58,8 +61,8 @@ public class Lua {
         return dumpStack(luaState);
     }
 
-    public ErrorStatus buildScript(String script) {
-        ErrorStatus status = ErrorStatus.get();
+    public LuaErrorStatus buildScript(String script) {
+        LuaErrorStatus status = LuaErrorStatus.get();
         luaState.luaL_loadstring(script);
         status.code = luaState.lua_pcall(0, 0, 0);
         status.error = "";
@@ -73,8 +76,8 @@ public class Lua {
     /**
      * Call function
      */
-    public ErrorStatus callFunction(int nargs, int nresults, int msgh) {
-        ErrorStatus status = ErrorStatus.get();
+    public LuaErrorStatus callFunction(int nargs, int nresults, int msgh) {
+        LuaErrorStatus status = LuaErrorStatus.get();
         status.code = luaState.lua_pcall(nargs, nresults, msgh);
         status.error = "";
         if(!status.isValid()) {
@@ -82,10 +85,6 @@ public class Lua {
             status.error = idlString.c_str();
         }
         return status;
-    }
-
-    public LuaImport getLuaImport() {
-        return luaImport;
     }
 
     void addObjectInstance(int key, Object object) {
@@ -96,6 +95,34 @@ public class Lua {
         Object remove = luaJavaInstances.remove(hash);
         return remove != null;
     }
+
+    public void addImportListener(String key, ImportListener importListener) {
+        importMap.put(key, importListener);
+    }
+
+    public void removeImportListener(String key) {
+        importMap.remove(key);
+    }
+
+    void register(Lua lua) {
+        LuaFunction function = new DefaultImportFunction() {
+            @Override
+            public int onImport(LuaState luaState) {
+                String importParam = luaState.lua_tostring(-1).c_str();
+                ImportListener importListener = importMap.get(importParam);
+                if(importListener != null) {
+                    luaState.lua_pop(-1);
+                    return importListener.onImport(luaState);
+                }
+                else {
+                    luaState.luaL_error("Import param is not registered: " + importParam);
+                }
+                return 0;
+            }
+        };
+        LuaLibrary.addLibrary(lua, "java.import", function);
+    }
+
 
     /**
      * Return the table log on top of the stack

@@ -1,5 +1,8 @@
-package lua;
+package lua.register;
 
+import lua.LuaFunction;
+import lua.LuaState;
+import lua.LuaTypes;
 import lua.register.ImportListener;
 
 /**
