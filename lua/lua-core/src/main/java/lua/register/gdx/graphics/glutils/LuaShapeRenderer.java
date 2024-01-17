@@ -11,21 +11,24 @@ import lua.register.LuaCreateClass;
 
 public class LuaShapeRenderer {
 
-    private static final String METATABLE = "com.badlogic.gdx.graphics.glutils.ShapeRenderer";
-    private static final String TEMPLATE = "Template";
-
-    public LuaShapeRenderer() {
-
-    }
-
     public static void register(Lua lua) {
         LuaState luaState = lua.getLuaState();
 
-        Class<ShapeRenderer> clazz = ShapeRenderer.class;
+        String rendererClassName = "com.badlogic.gdx.graphics.glutils.ShapeRenderer";
 
-        LuaLibrary.registerMetaClass(lua, clazz);
+        LuaLibrary.registerClass(lua, rendererClassName, true);
 
-        LuaLibrary.registerClassFunction(LuaTableType.TEMPLATE, lua, clazz, "begin", new LuaFunction() {
+        LuaLibrary.registerMetaClassTableNewIndex(lua, LuaTableType.CLASS, rendererClassName, new DefaultNewIndexFunction());
+        LuaLibrary.registerMetaClassTableNewIndex(lua, LuaTableType.TEMPLATE, rendererClassName, new DefaultNewIndexFunction());
+
+        LuaLibrary.setClassNewFunction(lua, rendererClassName, new LuaCreateClass() {
+            @Override
+            public Object onCreateClass(LuaState luaState) {
+                return new ShapeRenderer();
+            }
+        });
+
+        LuaLibrary.setMetaClassFunction(lua, LuaTableType.TEMPLATE, rendererClassName, "Begin", new LuaFunction() {
             @Override
             public int onCall(LuaState luaState) {
                 System.out.println("BEGIN CALLED");
@@ -33,14 +36,13 @@ public class LuaShapeRenderer {
             }
         });
 
-        LuaLibrary.registerClassNewFunction(lua, clazz, new LuaCreateClass() {
+        LuaLibrary.setMetaClassFunction(lua, LuaTableType.TEMPLATE, rendererClassName, "End", new LuaFunction() {
             @Override
-            public Object onCreateClass(LuaState luaState) {
-                return new ShapeRenderer();
+            public int onCall(LuaState luaState) {
+                System.out.println("END CALLED");
+                return 0;
             }
         });
 
-        LuaLibrary.registerMetaClassTableNewIndex(LuaTableType.CLASS, lua, clazz, new DefaultNewIndexFunction());
-        LuaLibrary.registerMetaClassTableNewIndex(LuaTableType.TEMPLATE, lua, clazz, new DefaultNewIndexFunction());
     }
 }

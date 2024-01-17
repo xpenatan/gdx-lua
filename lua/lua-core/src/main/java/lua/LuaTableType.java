@@ -2,5 +2,6 @@ package lua;
 
 public enum LuaTableType {
     CLASS,
-    TEMPLATE
+    TEMPLATE,
+    ENUM
 }

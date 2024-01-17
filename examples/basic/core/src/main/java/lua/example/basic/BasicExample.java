@@ -60,10 +60,11 @@ public class BasicExample extends ImGuiRenderer {
     }
 
     public void update() {
+
         if(!luaError) {
             LuaState luaState = lua.getLuaState();
             // Call function onRender if exist
-            luaState.lua_getglobal("onRender");
+            luaState.lua_getglobal("render");
             if(luaState.lua_isnil(-1) != 0 || luaState.lua_isfunction(-1) == 0) {
                 //Pop because it's not a function
                 luaState.lua_pop(1);
@@ -101,7 +102,8 @@ public class BasicExample extends ImGuiRenderer {
         long pointer = lua.getLuaState().lua_topointer(-1);
 //        String s = lua.dumpTable("ShapeRenderer");
         String ShapeRenderer = lua.dumpTable("ShapeRenderer");
-        String renderer = lua.dumpTable("renderer");
+        String GL20 = lua.dumpTable("GL20");
+        String Gdx = lua.dumpTable("Gdx");
         luaError = false;
         if(!status.isValid()) {
             String errorText = status.getError();
