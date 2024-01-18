@@ -140,9 +140,6 @@ public class Lua {
         else {
             dumpTable = table + " is not a table";
         }
-        if(top > 0) {
-            luaState.lua_pop(1);
-        }
 
         return dumpTable;
     }

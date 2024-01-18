@@ -43,11 +43,6 @@ public class BuildLua {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
         WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.cppCompiler.clear();
-        windowsTarget.linkerCompiler.clear();
-        windowsTarget.cppCompiler.add("x86_64-w64-mingw32-gcc");
-        windowsTarget.linkerCompiler.add("x86_64-w64-mingw32-gcc");
-        windowsTarget.cppFlags.remove("-std=c++17");
 
         windowsTarget.isStatic = true;
         windowsTarget.headerDirs.add("-Isrc/lua/");
@@ -67,15 +62,6 @@ public class BuildLua {
 
         // Make a static library
         EmscriptenTarget libTarget = new EmscriptenTarget(null);
-        libTarget.cppCompiler.clear();
-        libTarget.linkerCompiler.clear();
-        String cppCompilerr = EmscriptenTarget.EMSCRIPTEN_ROOT + "emcc";
-        if(BuildTarget.isWindows()) {
-            cppCompilerr += ".bat";
-        }
-        libTarget.cppCompiler.add(cppCompilerr);
-        libTarget.linkerCompiler.add(cppCompilerr);
-        libTarget.cppFlags.remove("-std=c++17");
 
         libTarget.isStatic = true;
         libTarget.compileGlueCode = false;

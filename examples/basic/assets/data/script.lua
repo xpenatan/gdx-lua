@@ -2,7 +2,7 @@ local ShapeRenderer = java.import("com.badlogic.gdx.graphics.glutils.ShapeRender
 local GL20 = java.import("com.badlogic.gdx.graphics.GL20")
 local Gdx = java.import("com.badlogic.gdx.Gdx")
 
-local shapeRenderer = ShapeRenderer.new()
+local renderer = ShapeRenderer.new()
 
 --
 --renderer:begin()
@@ -16,10 +16,10 @@ local shapeRenderer = ShapeRenderer.new()
 function render()
     Gdx.gl.glClearColor(1.0, 1.0, 1.0, 1.0)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-
-    shapeRenderer:Begin()
-     --shapeRenderer:begin(ShapeRenderer.ShapeType.Filled)
-     --shapeRenderer:setColor(1, 0, 0 ,1)
-     --shapeRenderer:rect(2, 20, 100, 100)
-    shapeRenderer:End()
+--
+    renderer:Begin()
+--     --shapeRenderer:begin(ShapeRenderer.ShapeType.Filled)
+--     --shapeRenderer:setColor(1, 0, 0 ,1)
+--     --shapeRenderer:rect(2, 20, 100, 100)
+    renderer:End()
 end

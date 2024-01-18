@@ -102,6 +102,7 @@ public class BasicExample extends ImGuiRenderer {
         long pointer = lua.getLuaState().lua_topointer(-1);
 //        String s = lua.dumpTable("ShapeRenderer");
         String ShapeRenderer = lua.dumpTable("ShapeRenderer");
+        String renderer = lua.dumpTable("renderer");
         String GL20 = lua.dumpTable("GL20");
         String Gdx = lua.dumpTable("Gdx");
         luaError = false;
