@@ -48,15 +48,19 @@ public class BasicExample extends ImGuiRenderer {
         buildScript(code);
     }
 
+    int moveState = 1;
+    // 1 = RIGHT
+    // 2 = TOP
+    // 3 = LEFT
+    // 4 = BOTTOM
+
+    float recX = 50;
+    float recY = 50;
+
     @Override
     public void renderImGui() {
         update();
         renderEditText();
-
-        renderer.begin(ShapeRenderer.ShapeType.Filled);
-        renderer.setColor(1, 0, 0 ,1);
-        renderer.rect(2, 20, 100, 100);
-        renderer.end();
     }
 
     public void update() {

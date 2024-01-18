@@ -1,16 +1,50 @@
 package lua;
 
+import java.util.List;
 import lua.register.ImportListener;
 import lua.register.LuaCreateClass;
+import lua.register.LuaIntEnumData;
 
 public class LuaLibrary {
 
     public static final String LUA_J_HASH = "java_hash";
-    private static final String TEMPLATE = "Template";
+    private static final String INSTANCE = "Instance";
     private static final String CLASS = "Class";
     private static final String ENUM = "Enum";
 
     private static boolean SKIP_ERROR_LOG = false;
+
+    public static Object getJavaInstance(Lua lua, LuaState luaState) {
+        String t = "Lua does not contains java instance";
+        if(luaState.lua_istable(1) != 0) {
+            luaState.lua_getfield(1, LuaLibrary.LUA_J_HASH);
+            if(luaState.lua_isnil(-1) != 0) {
+                luaState.lua_pop(1);
+                luaState.luaL_error(t);
+                return null;
+            }
+            else {
+                if(luaState.lua_isinteger(-1) == 0) {
+                    luaState.lua_pop(1);
+                    luaState.luaL_error(t);
+                    return null;
+                }
+                else {
+                    int hash = luaState.lua_tointeger(-1);
+                    luaState.lua_pop(1);
+                    Object o = lua.luaJavaInstances.get(hash);
+                    if(o == null) {
+                        luaState.luaL_error("Java object instance is null");
+                    }
+                    return o;
+                }
+            }
+        }
+        luaState.luaL_error(t);
+        return null;
+    }
+
+
 
     /**
      * Get or create the table and push to stack.
@@ -113,8 +147,8 @@ public class LuaLibrary {
                     luaState.lua_pop(1); // pop nill
                 }
             }
-            else if(type == LuaTableType.TEMPLATE) {
-                luaState.lua_getfield(-1, TEMPLATE);
+            else if(type == LuaTableType.CLASS_INSTANCE) {
+                luaState.lua_getfield(-1, INSTANCE);
                 if(luaState.lua_istable(-1) != 0) {
                     luaState.lua_remove(-2); // Remove metatable
                     return true;
@@ -140,17 +174,37 @@ public class LuaLibrary {
     }
 
     /**
-     * Add class function. MetaClass must exist
+     * Create enum table and push to stack.
      */
-    public static boolean setMetaClassFunction(Lua lua, LuaTableType type, String className, String functionName, LuaFunction function) {
+    public static boolean createEnumTable(Lua lua, List<LuaIntEnumData> enumList) {
+        if(enumList == null || enumList.isEmpty())
+            return false;
         LuaState luaState = lua.luaState;
-        if(getMetaClassTable(lua, type, className)) {
-            if(lua.registerFunction(functionName, function)) {
-                luaState.lua_pop(1);
-                return true;
-            }
+        luaState.lua_newtable();
+
+        for(int i = 0; i < enumList.size(); i++) {
+            LuaIntEnumData enumData = enumList.get(i);
+            luaState.lua_pushinteger(enumData.value);
+            luaState.lua_setfield(-2, enumData.key);
         }
-        return false;
+
+        lua.registerFunction("__newindex", new LuaFunction() {
+            @Override
+            public int onCall(LuaState luaState) {
+                luaState.luaL_error("Creating new Enum value is not allowed");
+                return 0;
+            }
+        });
+
+        lua.registerFunction("__index", new LuaFunction() {
+            @Override
+            public int onCall(LuaState luaState) {
+                luaState.luaL_error("Changing Enum value is not allowed");
+                return 0;
+            }
+        });
+
+        return true;
     }
 
     /**
@@ -212,10 +266,14 @@ public class LuaLibrary {
         return false;
     }
 
-    public static boolean registerMetaClassTableNewIndex(Lua lua, LuaTableType type, String className, LuaFunction luaFunction) {
+    /**
+     * Add class function. MetaClass must exist
+     */
+    public static boolean setMetaClassFunction(Lua lua, LuaTableType type, String className, String functionName, LuaFunction function) {
+        LuaState luaState = lua.luaState;
         if(getMetaClassTable(lua, type, className)) {
-            if(lua.registerFunction("__newindex", luaFunction)) {
-                lua.luaState.lua_pop(1);
+            if(lua.registerFunction(functionName, function)) {
+                luaState.lua_pop(1);
                 return true;
             }
         }
@@ -246,6 +304,16 @@ public class LuaLibrary {
         return false;
     }
 
+    public static boolean registerMetaClassTableNewIndex(Lua lua, LuaTableType type, String className, LuaFunction luaFunction) {
+        if(getMetaClassTable(lua, type, className)) {
+            if(lua.registerFunction("__newindex", luaFunction)) {
+                lua.luaState.lua_pop(1);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Create a lua instance. Require MetaClass template table.
      */
@@ -269,7 +337,7 @@ public class LuaLibrary {
 
         //Put metatable to the new created table
         {
-            if(getMetaClassTable(lua, LuaTableType.TEMPLATE, className)) {
+            if(getMetaClassTable(lua, LuaTableType.CLASS_INSTANCE, className)) {
                 luaState.lua_setmetatable(-2); // Set Template metatable to new table
             }
             else {
@@ -283,7 +351,7 @@ public class LuaLibrary {
      * Register MetaClass. Use lua code 'MYCLASS = java.import("class full path")' to obtain lua class object.
      * canInstantiate true means that this class can be created with new function or createInstanceObject.
      */
-    public static boolean registerClass(Lua lua, String className, boolean canInstantiate) {
+    public static boolean registerClass(Lua lua, String className, boolean addImport, boolean canInstantiate) {
         LuaState luaState = lua.luaState;
         SKIP_ERROR_LOG = true;
         if(getMetaClass(lua, className)) {
@@ -300,18 +368,20 @@ public class LuaLibrary {
             createMetaClassTemplate(lua, className);
         }
 
-        lua.addImportListener(className, new ImportListener() {
-            @Override
-            public int onImport(LuaState luaState) {
-                // Return a metatable
-                if(!getMetaClassTable(lua, LuaTableType.CLASS, className)) {
-                    luaState.luaL_error("Metatable don't exist");
+        if(addImport) {
+            lua.addImportListener(className, new ImportListener() {
+                @Override
+                public int onImport(LuaState luaState) {
+                    // Return a metatable
+                    if(!getMetaClassTable(lua, LuaTableType.CLASS, className)) {
+                        luaState.luaL_error("Metatable don't exist");
+                    }
+                    luaState.lua_pushvalue(-1);
+                    luaState.lua_setmetatable(-2); // Set Template metatable to new table
+                    return 1;
                 }
-                luaState.lua_pushvalue(-1);
-                luaState.lua_setmetatable(-2); // Set Template metatable to new table
-                return 1;
-            }
-        });
+            });
+        }
 
         return true;
     }
@@ -364,8 +434,10 @@ public class LuaLibrary {
                     }
                 });
             }
-            luaState.lua_setfield(-2, TEMPLATE); // set Template to metatable
+            luaState.lua_setfield(-2, INSTANCE); // set Template to metatable
         }
+
+        luaState.lua_pop(1);
     }
 
     private static void createMetaClassClass(Lua lua, String metaTable) {
@@ -390,7 +462,6 @@ public class LuaLibrary {
             luaState.lua_setfield(-2, CLASS); // set Class to metatable
         }
 
-        String s = lua.dumpTable();
         luaState.lua_pop(1);
     }
 

@@ -10,17 +10,16 @@ import lua.LuaTableType;
 
 public class LuaGL20 {
 
-    public static void registerGL(Lua lua) {
+    public static final String CLASSNAME = "com.badlogic.gdx.graphics.GL20";
+
+    public static void register(Lua lua) {
         LuaState luaState = lua.getLuaState();
 
+        LuaLibrary.registerClass(lua, CLASSNAME, true, false);
 
-        String GL20ClassName = "com.badlogic.gdx.graphics.GL20";
+        LuaLibrary.setMetaClassInt(lua, LuaTableType.CLASS, CLASSNAME, "GL_COLOR_BUFFER_BIT", GL20.GL_COLOR_BUFFER_BIT);
 
-        LuaLibrary.registerClass(lua, GL20ClassName, true);
-
-        LuaLibrary.setMetaClassInt(lua, LuaTableType.CLASS, GL20ClassName, "GL_COLOR_BUFFER_BIT", GL20.GL_COLOR_BUFFER_BIT);
-
-        LuaLibrary.setMetaClassFunction(lua, LuaTableType.TEMPLATE, GL20ClassName, "glClearColor", new LuaFunction() {
+        LuaLibrary.setMetaClassFunction(lua, LuaTableType.CLASS, CLASSNAME, "glClearColor", new LuaFunction() {
 
             @Override
             public int onCall(LuaState luaState) {
@@ -49,7 +48,7 @@ public class LuaGL20 {
             }
         });
 
-        LuaLibrary.setMetaClassFunction(lua, LuaTableType.TEMPLATE, GL20ClassName, "glClear", new LuaFunction() {
+        LuaLibrary.setMetaClassFunction(lua, LuaTableType.CLASS, CLASSNAME, "glClear", new LuaFunction() {
 
             @Override
             public int onCall(LuaState luaState) {

@@ -5,21 +5,26 @@ import lua.Lua;
 import lua.LuaLibrary;
 import lua.LuaTableType;
 import lua.register.gdx.graphics.LuaGL20;
+import lua.register.gdx.graphics.LuaGraphics;
 import lua.register.gdx.graphics.glutils.LuaShapeRenderer;
 
 public class LuaGdx {
+    public static final String CLASSNAME = "com.badlogic.gdx.Gdx";
 
     public static void register(Lua lua) {
-        LuaGL20.registerGL(lua);
+        LuaGL20.register(lua);
+        LuaGraphics.register(lua);
         LuaShapeRenderer.register(lua);
 
-        String gdxClassName = "com.badlogic.gdx.Gdx";
-        LuaLibrary.registerClass(lua, gdxClassName, false);
 
-        String glClassName = "com.badlogic.gdx.graphics.GL20";
+        LuaLibrary.registerClass(lua, LuaGdx.CLASSNAME, true, false);
 
-        if(LuaLibrary.createInstanceObject(lua, glClassName, Gdx.gl)) {
-            LuaLibrary.setMetaClassTable(lua, LuaTableType.CLASS, gdxClassName, "gl");
+        if(LuaLibrary.getMetaClassTable(lua, LuaTableType.CLASS, LuaGL20.CLASSNAME)) {
+            LuaLibrary.setMetaClassTable(lua, LuaTableType.CLASS, LuaGdx.CLASSNAME, "gl");
+        }
+
+        if(LuaLibrary.getMetaClassTable(lua, LuaTableType.CLASS, LuaGraphics.CLASSNAME)) {
+            LuaLibrary.setMetaClassTable(lua, LuaTableType.CLASS, LuaGdx.CLASSNAME, "graphics");
         }
 
 //        LuaLibrary.setMetaClassFloat()
