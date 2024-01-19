@@ -24,6 +24,7 @@ tasks.register<JavaExec>("build_project") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+val buildDir = layout.buildDirectory.get().asFile
 val zippedPath = "$buildDir/lua-source.zip"
 val sourcePath = "$buildDir/lua-source"
 val sourceDestination = "$buildDir/lua/"
@@ -44,29 +45,8 @@ tasks.register<Download>("download_source_lua") {
     }
 }
 
-val solZippedPath = "$buildDir/sol2/sol/"
-
-tasks.register("download_source_sol") {
-    group = "lua"
-    description = "Download sol2 source"
-    doLast {
-        download.run {
-            src("https://github.com/ThePhD/sol2/releases/download/v3.3.0/sol.hpp")
-            dest("$solZippedPath/sol.hpp")
-        }
-        download.run {
-            src("https://github.com/ThePhD/sol2/releases/download/v3.3.0/config.hpp")
-            dest("$solZippedPath/config.hpp")
-        }
-        download.run {
-            src("https://github.com/ThePhD/sol2/releases/download/v3.3.0/forward.hpp")
-            dest("$solZippedPath/forward.hpp")
-        }
-    }
-}
-
 tasks.register("download_source") {
     group = "lua"
     description = "Download source"
-    dependsOn(arrayOf("download_source_sol", "download_source_lua"))
+    dependsOn(arrayOf("download_source_lua"))
 }

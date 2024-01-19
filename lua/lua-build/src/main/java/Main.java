@@ -37,7 +37,6 @@ public class Main {
         IDLReader idlReader = IDLReader.readIDL(idlPath);
         String baseJavaDir = luaBasePath + "/src/main/java";
 
-        String cppSourceDir = luaBuildPath + "/build/sol2/";
         String cppBuildPath = luaBuildPath + "/build/c++";
         String libsDir = cppBuildPath + "/libs/";
         String cppDestinationPath = cppBuildPath + "/src";
