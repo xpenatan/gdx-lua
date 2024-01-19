@@ -1,7 +1,7 @@
 // Core
 include(":lua:lua-base")
 include(":lua:lua-build")
-include(":lua:lua-gen")
+include(":lua:lua-cpp")
 include(":lua:lua-core")
 include(":lua:lua-desktop")
 include(":lua:lua-teavm")

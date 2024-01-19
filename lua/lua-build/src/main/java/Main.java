@@ -30,7 +30,7 @@ public class Main {
         String luaPath = new File("./../").getCanonicalPath().replace("\\", "/");
         String luaBasePath = luaPath + "/lua-base";
         String luaBuildPath = luaPath + "/lua-build";
-        String luaCorePath = luaPath + "/lua-gen";
+        String luaCPPPath = luaPath + "/lua-cpp";
         String luaTeavmPath = luaPath + "/lua-teavm";
 
         String idlPath = luaBuildPath + "/src/main/cpp/lua54.idl";
@@ -54,7 +54,7 @@ public class Main {
                 }
             };
             cppParser.generateClass = true;
-            JParser.generate(cppParser, baseJavaDir, luaCorePath + "/src/main/java");
+            JParser.generate(cppParser, baseJavaDir, luaCPPPath + "/src/main/java");
         }
         {
             TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, null) {
