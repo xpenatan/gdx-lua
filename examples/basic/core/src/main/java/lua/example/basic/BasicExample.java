@@ -6,10 +6,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import imgui.ImGui;
 import imgui.ImGuiCond;
 import imgui.ImVec2;
-import imgui.extension.textedit.Coordinates;
-import imgui.extension.textedit.LanguageDefinition;
+import imgui.extension.textedit.LanguageDefinitionId;
 import imgui.extension.textedit.TextEditor;
-import imgui.idl.helper.IDLString;
+import imgui.idl.helper.IDLInt;
 import lua.LuaErrorStatus;
 import lua.Lua;
 import lua.LuaState;
@@ -30,13 +29,11 @@ public class BasicExample extends ImGuiRenderer {
         super.show();
         editor = new TextEditor();
 
-        LanguageDefinition languageDefinition = LanguageDefinition.Lua();
+        int languageDefinition = LanguageDefinitionId.Lua;
         editor.SetLanguageDefinition(languageDefinition);
 
         String code = Gdx.files.internal("data/script.lua").readString();
-        IDLString text = new IDLString();
-        text.append(code);
-        editor.SetText(text);
+        editor.SetText(code);
         lua = new Lua();
 
         LuaState luaState = lua.getLuaState();
@@ -86,11 +83,11 @@ public class BasicExample extends ImGuiRenderer {
     }
 
     void renderEditText() {
-        Coordinates coordinates = editor.GetCursorPosition();
+        editor.GetCursorPosition(IDLInt.TMP_1, IDLInt.TMP_2);
 
         ImGui.SetNextWindowSize(ImVec2.TMP_1.set(600, 500), ImGuiCond.ImGuiCond_Once);
         ImGui.Begin("Editor");
-        String text = "\t" + (coordinates.mLine() + 1) + "/" + (coordinates.mColumn() + 1) + " " + editor.GetTotalLines() + " lines | " + (editor.IsOverwrite() ? "Ovr" : "Ins") + " | " + (editor.CanUndo() ? "*" : " ") + " | " + editor.GetLanguageDefinition().mName().c_str();
+        String text = "\t" + (IDLInt.TMP_1.getValue() + 1) + "/" + (IDLInt.TMP_2.getValue() + 1) + " " + editor.GetLineCount() + " lines | " + (editor.IsOverwriteEnabled() ? "Ovr" : "Ins") + " | " + (editor.CanUndo() ? "*" : " ") + " | " + editor.GetLanguageDefinitionName().c_str();
         if(ImGui.Button("Build")) {
             String scriptText = editor.GetText().c_str();
             buildScript(scriptText);
