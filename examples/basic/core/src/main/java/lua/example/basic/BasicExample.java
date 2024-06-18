@@ -3,6 +3,7 @@ package lua.example.basic;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.ScreenUtils;
 import imgui.ImGui;
 import imgui.ImGuiCond;
 import imgui.ImVec2;
@@ -41,8 +42,6 @@ public class BasicExample extends ImGuiRenderer {
         LuaGdx luaGdx = new LuaGdx();
 
         luaGdx.register(lua);
-
-        buildScript(code);
     }
 
     int moveState = 1;
@@ -56,12 +55,12 @@ public class BasicExample extends ImGuiRenderer {
 
     @Override
     public void renderImGui() {
+        ScreenUtils.clear(1f, 1f, 1f, 1f);
         update();
         renderEditText();
     }
 
     public void update() {
-
         if(!luaError) {
             LuaState luaState = lua.getLuaState();
             // Call function onRender if exist
